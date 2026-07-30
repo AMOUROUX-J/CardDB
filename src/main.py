@@ -1,36 +1,73 @@
 from pathlib import Path
-import Card
+import cardLogics
 from equipmentCard import Equipment
 from CreatureCard import Creature
 import json
 
-def createCard(Cardtype:str):
-    pass
+def getKeybordData() -> dict[str, str]:
+    """
+    Méthode temp pour crée les cartes. itemType ne sert que pour des équipements
 
-def readFile(name:str,cardType:str):
-    pathToFile = f"./cardsData/{cardType}_{name}.json"
-    with open(file=pathToFile,encoding='utf8',mode='r') as inFile:
-        data = json.load(inFile)
+    Returns:
+        dict[str, str]: les données complete de la carte à crée
+    """
     
-    match cardType :
-        case "creature":
-            return Creature(name=data["name"],
+    outData = {
+        "name":input("name: "),
+        "hp": input("hp: "),
+        "atk":input("atk: "),
+        "defence":input("def: "),
+        "heal":input("heal: "),
+        "currency":input("costType: "),
+        "cost":input("cost: "),
+        "talent":input("talent: "),
+        'type1':input("type2: "),
+        'type2':('type2: '),
+        "crit":input("crit: "),
+        "race":input("race: "),
+        "weaponType":input("weapon: "),
+        "target":input("targeting: "),
+        "itemType":input("itemType")
+    }
+    return outData
+
+def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | None:
+    """
+    Génère un objet Card soit depuis un dico contenant un dico des donnés si aucun dico fourni, demande toutes les données via des input() (temp en attendant l'IG)
+
+    Args:
+        Cardtype (str): type de carte, pour l'instant reçois : creature ou equipment
+        data (dict, optional): le dictionnaire des données. Defaults to {}.
+
+    Raises:
+        ValueError: si le type de carte n'existe pas dans la BD
+    
+    Returns:
+        Card: un objet Card
+    """
+    
+    if not data:
+        data = getKeybordData()
+    
+    match Cardtype :
+            case "creature":
+                return Creature(name=data["name"],
                             hp= data["hp"],
                             atk=data["atk"],
-                            defence=data["def"],
+                            defense=data["def"],
                             heal=data["heal"],
                             currency=data["costType"],
                             cost=data["cost"],
                             talent=data["talent"],
-                            elementType=[data["type1"],data['type2']],
+                            elementType=data["types"],
                             crit=data["crit"],
                             race=data["race"],
                             weaponType=data["weapon"],
                             target=data["targeting"]
                             )
-        
-        case "equipment":
-            return Equipment(
+                
+            case "equipment":
+                return Equipment(
                     name=data["name"],
                     hp= data["hp"],
                     atk=data["atk"],
@@ -46,8 +83,46 @@ def readFile(name:str,cardType:str):
                     target=data["targeting"],
                     itemType=data["itemType"],
             )
+            case _:
+                raise ValueError("type de carte non supporté")
 
-def writeFile(card, overwrite: bool = False):
+def readFile(name:str,cardType:str) -> Creature | Equipment | None:
+    """
+    extrait les données d'une carte à partir des fichiers. chaque carte a son nom sous forme `{type de carte}_{nom carte}`
+
+    Args:
+        name (str): nom de la carte
+        cardType (str): ty de carte
+
+    Returns:
+        Card: renvoie la carte
+    """
+    
+    pathToFile = f"./cardsData/{cardType}_{name}.json"
+    with open(file=pathToFile,encoding='utf8',mode='r') as inFile:
+        data = json.load(inFile)
+    
+    match cardType :
+        case "creature":
+            return createCard("creature",data)
+        
+        case "equipment":
+            return createCard("equipment",data)
+
+def writeFile(card, overwrite: bool = False) -> str:
+    """
+    Enregistre la carte dans le dossier ./cardsData avec le nom sous format `{type de carte}_{nom carte}`
+
+    Args:
+        card (Card): l'objet Card
+        overwrite (bool, optional): si oui ou non écrase si la carte existe déjà. Defaults to False.
+
+    Raises:
+        FileExistsError: si overwrite == False empêche d'écraser la carte déjà existante
+
+    Returns:
+        str: le chemin ou la carte à été enregistrer
+    """
     name = card.name
     cardType = card.cardtype
 
@@ -65,26 +140,20 @@ def writeFile(card, overwrite: bool = False):
         "costType": card.currency,
         "cost": card.cost,
         "talent": card.talent,
-        "type1": card.elementType[0] if len(card.elementType) > 0 else None,
-        "type2": card.elementType[1] if len(card.elementType) > 1 else None,
+        "types": card.elementType if len(card.elementType) > 0 else None,
         "crit": card.combatStat.crit,
         "race": getattr(card, "race", None),
         "weapon": getattr(card, "weaponType", None),
         "targeting": card.combatStat.target,
     }
 
-    # if isinstance(card, Equipment):
-    #     payload["itemType"] = getattr(card, "type", None)
-
     with open(file= pathToFile, mode="w", encoding='utf8') as outFile:
         json.dump(payload, outFile, ensure_ascii=False, indent=2)
-        
     print(f"done at {pathToFile}")
 
     return pathToFile
 
-
 if __name__ == "__main__":
-    eweCard = Creature(race="magique",weaponType="lourd",elementType=["special"],name="ewe",cost=5,talent="increvable",currency="money",hp=15,crit=8,atk=10,defence=0,heal=3,target="mono")
+    eweCard = Creature(race="magique",weaponType="lourd",elementType=["special"],name="ewe",cost=5,talent="increvable",currency="money",hp=15,crit=8,atk=10,defense=0,heal=3,target="mono")
     writeFile(eweCard,overwrite=True)
     readFile("ewe","creature")

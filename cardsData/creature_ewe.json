@@ -6,9 +6,12 @@
   "heal": 3,
   "costType": "money",
   "cost": 5,
-  "talent": "increvable",
-  "type1": "special",
-  "type2": null,
+  "talent": [
+    "increvable"
+  ],
+  "types": [
+    "special"
+  ],
   "crit": 8,
   "race": "magique",
   "weapon": "lourd",
