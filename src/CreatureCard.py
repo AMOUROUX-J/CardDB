@@ -44,8 +44,8 @@ class Creature(Card):
             if currentType not in cardLogics.readRules("elements"):
                 raise ValueError("element invalide")
         
-        super().__init__(name, cost, currency, talent, elementType)
+        super().__init__(name, cost, currency, talent, elementType) # pyright: ignore[reportArgumentType]
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)
         self.weaponType= weaponType
-        self.cardtype = "creature"
+        self.cardType = "creature"
         self.race = race.lower()

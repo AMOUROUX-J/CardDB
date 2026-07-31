@@ -1,3 +1,4 @@
+from types import NoneType
 import unittest
 import cardLogics
 from equipmentCard import Equipment
@@ -22,7 +23,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(eweCard.race ,"magique")
         self.assertEqual(eweCard.weaponType ,"lourd")
         self.assertEqual(eweCard.elementType ,["special"])
-        self.assertEqual(eweCard.cardtype, "creature")
+        self.assertEqual(eweCard.cardType, "creature")
 
     def testCreatureMinInfo(self) -> None:
         smallCard = Creature(race="magique",elementType=["eau","special"],name="esprit de glace",cost=1,currency="bleu",atk=2,hp=5,crit=20)
@@ -38,10 +39,10 @@ class TestCard(unittest.TestCase):
         self.assertEqual(smallCard.race ,"magique")
         self.assertEqual(smallCard.weaponType ,None)
         self.assertEqual(smallCard.elementType ,["eau","special"])
-        self.assertEqual(smallCard.cardtype, "creature")
+        self.assertEqual(smallCard.cardType, "creature")
 
     def testWeaponCardCreate(self) -> None:
-        armeCard = Equipment(itemType="arme",weaponType="lourd"  , elementType=[],name="pique Longue",cost=5,talent="Tueur d'animaux",currency="money",atk=3,defence=1) # pyright: ignore[reportArgumentType]
+        armeCard = Equipment(itemType="arme",weaponType="lourd"  , elementType=[],name="pique Longue",cost=5,talent="Tueur d'animaux",currency="money",atk=3,defense=1) # pyright: ignore[reportArgumentType]
         self.assertEqual(armeCard.name,"pique Longue")
         self.assertEqual(armeCard.combatStat.hp ,0)
         self.assertEqual(armeCard.combatStat.atk ,3)
@@ -58,7 +59,7 @@ class TestCard(unittest.TestCase):
 
     def testArmorCardCreate(self) -> None:
         armorCard = Equipment(weaponType=None, itemType="armure", elementType=[], name="casque de combat", 
-                        cost=3, currency="money", hp = 5, defence = 1, crit = 0, atk = 0, heal = 0,
+                        cost=3, currency="money", hp = 5, defense = 1, crit = 0, atk = 0, heal = 0,
                         target="mono",race=["magique","vegetal","artificiel","humanoide","animal"])
         self.assertEqual(armorCard.name,"casque de combat")
         self.assertEqual(armorCard.combatStat.hp ,5)
@@ -75,7 +76,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(armorCard.equipmentType, "armure")
     
     def testTankCardCreate(self) -> None: 
-        tankCard = Equipment(elementType=["acier"], weaponType=None, itemType="armure", name="tank", cost=50, currency="money", hp=30, atk=15, defence=10, talent=["Absobtion","incurable"], race=["humanoide"])
+        tankCard = Equipment(elementType=["acier"], weaponType=None, itemType="armure", name="tank", cost=50, currency="money", hp=30, atk=15, defense=10, talent=["Absobtion","incurable"], race=["humanoide"])
         self.assertEqual(tankCard.name, "tank")
         self.assertEqual(tankCard.combatStat.hp, 30)
         self.assertEqual(tankCard.combatStat.atk, 15)
@@ -129,10 +130,10 @@ class TestCard(unittest.TestCase):
         self.assertEqual(spellCard.elementType, ["feu"])
         self.assertEqual(spellCard.typeSort, "invocation")
 
-    def testWriteReadCard(self):
-        armeCard = Equipment(itemType="arme",weaponType="lourd"  , elementType=[],name="pique Longue",cost=5,talent="Tueur d'animaux",currency="money",atk=3,defence=1)
+    def testWriteReadCard(self) -> None:
+        armeCard = Equipment(itemType="arme",weaponType="lourd"  , elementType=[],name="pique Longue",cost=5,talent=["Tueur d'animaux"],currency="money",atk=3,defense=1)
         main.writeFile(armeCard, overwrite=True)
-        armeCardRead = main.readFile(armeCard.name, armeCard.equipmentType)
+        armeCardRead = main.readFile(armeCard.name, armeCard.cardType)
         self.assertEqual(armeCard.name,armeCardRead.name)
         self.assertEqual(armeCard.combatStat.hp ,armeCardRead.combatStat.hp)
         self.assertEqual(armeCard.combatStat.atk ,armeCardRead.combatStat.atk)
@@ -143,11 +144,11 @@ class TestCard(unittest.TestCase):
         self.assertEqual(armeCard.cost ,armeCardRead.cost)
         self.assertEqual(armeCard.talent ,armeCardRead.talent)
         self.assertEqual(armeCard.race ,armeCardRead.race)
-        self.assertEqual(armeCard.cardtype,armeCardRead.cardtype)
+        self.assertEqual(armeCard.cardType,armeCardRead.cardType)
         self.assertEqual(armeCard.weaponType ,armeCardRead.weaponType)
         self.assertEqual(armeCard.elementType ,armeCardRead.elementType)
-        self.assertEqual(armeCard.equipmentType, armeCardRead.equipmentType)
+        self.assertEqual(armeCard.equipmentType, armeCardRead.equipmentType) # pyright: ignore[reportAttributeAccessIssue]
         #[print(f"\n\t{key:15}: {getattr(armeCardRead, key)}") for key in armeCardRead.__dict__.keys()]
-
+        
 if __name__ == "__main__":
     unittest.main(verbosity=2)

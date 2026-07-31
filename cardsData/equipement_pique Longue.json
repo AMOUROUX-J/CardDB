@@ -9,9 +9,12 @@
   "talent": [
     "Tueur d'animaux"
   ],
-  "types": null,
+  "types": [],
   "crit": 0,
   "race": [],
   "weapon": "lourd",
-  "targeting": null
+  "targeting": null,
+  "cardType": "equipement",
+  "weaponType": "lourd",
+  "itemType": "arme"
 }

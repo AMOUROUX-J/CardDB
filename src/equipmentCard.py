@@ -8,7 +8,7 @@ import cardLogics
 class Equipment(Card):
     def __init__(self, weaponType:str|None ,elementType:list[str], itemType:str,
                 name: str, cost: int, currency: str,
-                hp:int=0, crit:int=0 ,atk:int=0,  defence:int=0, heal:int=0, target:str|None=None, talent: list[str]|None=None, race:list[str]=[]# pyright: ignore[reportArgumentType]
+                hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None, talent: list[str]|None=None, race:list[str]=[]# pyright: ignore[reportArgumentType]
                 ) -> None:
         """
         crée l'équipement (armure ou arme)
@@ -34,25 +34,26 @@ class Equipment(Card):
             ValueError: si arme absent des règles
             ValueError: si elements absent des règles
         """
-        if isinstance(race, list):
+        if isinstance(race, list) and race:
             race = [i.lower() for i in race]
             for i in race:
                 if i not in cardLogics.readRules("races"):
                     raise ValueError("race innexistante")
         else :
-            if race not in cardLogics.readRules("races"):
+            if race not in cardLogics.readRules("races") and not race == []:
                 raise ValueError("race innexistante")
             
         if weaponType not in cardLogics.readRules("armes") and not weaponType == None:
             raise ValueError("type d'arme erreur")
         
+        
         for currentType in elementType:
-            if currentType not in cardLogics.readRules("elements") and not race == None:
+            if currentType not in cardLogics.readRules("elements") and not currentType == None:
                 raise ValueError("element invalide")
 
         super().__init__(name, cost, currency, talent, elementType) # pyright: ignore[reportArgumentType]
-        self.combatStat = CombatData(hp, crit, atk, defence, heal, target)
-        self.cardtype = "equipement"
+        self.combatStat = CombatData(hp, crit, atk, defense, heal, target)
+        self.cardType = "equipement"
         self.equipmentType = itemType
         self.weaponType = weaponType
         self.race = race

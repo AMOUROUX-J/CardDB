@@ -15,5 +15,6 @@
   "crit": 8,
   "race": "magique",
   "weapon": "lourd",
-  "targeting": "mono"
+  "targeting": "mono",
+  "cardType": "creature"
 }
