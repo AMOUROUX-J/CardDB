@@ -4,6 +4,8 @@ from equipmentCard import Equipment
 from CreatureCard import Creature
 from SpellCard import Spell
 
+import main
+
 class TestCard(unittest.TestCase):
     
     def testCreatureCardCreate(self) -> None:
@@ -52,7 +54,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(armeCard.race ,[])
         self.assertEqual(armeCard.weaponType ,"lourd")
         self.assertEqual(armeCard.elementType ,[])
-        self.assertEqual(armeCard.type, "arme")
+        self.assertEqual(armeCard.equipmentType, "arme")
 
     def testArmorCardCreate(self) -> None:
         armorCard = Equipment(weaponType=None, itemType="armure", elementType=[], name="casque de combat", 
@@ -70,7 +72,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(armorCard.race ,["magique","vegetal","artificiel","humanoide","animal"])
         self.assertEqual(armorCard.weaponType ,None)
         self.assertEqual(armorCard.elementType ,[])
-        self.assertEqual(armorCard.type, "armure")
+        self.assertEqual(armorCard.equipmentType, "armure")
     
     def testTankCardCreate(self) -> None: 
         tankCard = Equipment(elementType=["acier"], weaponType=None, itemType="armure", name="tank", cost=50, currency="money", hp=30, atk=15, defence=10, talent=["Absobtion","incurable"], race=["humanoide"])
@@ -86,7 +88,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(tankCard.race, ["humanoide"])
         self.assertEqual(tankCard.weaponType, None)
         self.assertEqual(tankCard.elementType, ["acier"])
-        self.assertEqual(tankCard.type, "armure")
+        self.assertEqual(tankCard.equipmentType, "armure")
 
     def testreadRules(self) -> None:
         rulesList = cardLogics.readRules("testrule")
@@ -127,6 +129,25 @@ class TestCard(unittest.TestCase):
         self.assertEqual(spellCard.elementType, ["feu"])
         self.assertEqual(spellCard.typeSort, "invocation")
 
+    def testWriteReadCard(self):
+        armeCard = Equipment(itemType="arme",weaponType="lourd"  , elementType=[],name="pique Longue",cost=5,talent="Tueur d'animaux",currency="money",atk=3,defence=1)
+        main.writeFile(armeCard, overwrite=True)
+        armeCardRead = main.readFile(armeCard.name, armeCard.equipmentType)
+        self.assertEqual(armeCard.name,armeCardRead.name)
+        self.assertEqual(armeCard.combatStat.hp ,armeCardRead.combatStat.hp)
+        self.assertEqual(armeCard.combatStat.atk ,armeCardRead.combatStat.atk)
+        self.assertEqual(armeCard.combatStat.defence ,armeCardRead.combatStat.defence)
+        self.assertEqual(armeCard.combatStat.heal ,armeCardRead.combatStat.heal)
+        self.assertEqual(armeCard.combatStat.target ,armeCardRead.combatStat.target)
+        self.assertEqual(armeCard.currency ,armeCardRead.currency)
+        self.assertEqual(armeCard.cost ,armeCardRead.cost)
+        self.assertEqual(armeCard.talent ,armeCardRead.talent)
+        self.assertEqual(armeCard.race ,armeCardRead.race)
+        self.assertEqual(armeCard.cardtype,armeCardRead.cardtype)
+        self.assertEqual(armeCard.weaponType ,armeCardRead.weaponType)
+        self.assertEqual(armeCard.elementType ,armeCardRead.elementType)
+        self.assertEqual(armeCard.equipmentType, armeCardRead.equipmentType)
+        #[print(f"\n\t{key:15}: {getattr(armeCardRead, key)}") for key in armeCardRead.__dict__.keys()]
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

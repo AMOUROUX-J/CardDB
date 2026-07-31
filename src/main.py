@@ -156,4 +156,5 @@ def writeFile(card, overwrite: bool = False) -> str:
 if __name__ == "__main__":
     eweCard = Creature(race="magique",weaponType="lourd",elementType=["special"],name="ewe",cost=5,talent="increvable",currency="money",hp=15,crit=8,atk=10,defense=0,heal=3,target="mono")
     writeFile(eweCard,overwrite=True)
-    readFile("ewe","creature")
+    creature = readFile("ewe","creature")
+    #[print(f"\t{key:15}: {getattr(creature, key)}") for key in creature.__dict__.keys()]

@@ -52,6 +52,7 @@ class Equipment(Card):
 
         super().__init__(name, cost, currency, talent, elementType) # pyright: ignore[reportArgumentType]
         self.combatStat = CombatData(hp, crit, atk, defence, heal, target)
-        self.type = itemType
+        self.cardtype = "equipement"
+        self.equipmentType = itemType
         self.weaponType = weaponType
         self.race = race

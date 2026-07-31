@@ -23,3 +23,6 @@ class CombatData:
         self.defence = defence
         self.heal = heal
         self.target = target
+        
+    def __str__(self) -> str:
+        return f"hp: {self.hp}, crit: {self.crit}"    
