@@ -113,7 +113,20 @@ class TestCard(unittest.TestCase):
         
     def testSpell2(self) -> None:
         spellCard = Spell(name="Cortilège de protection",cost=3,currency="bleu",typeSort="invocation",hp=10,defense=3,elementType=["feu"],race="artificiel",talent=["Muraille"])
-        
+        self.assertEqual(spellCard.name, "Cortilège de protection")
+        self.assertEqual(spellCard.combatStat.hp, 10)
+        self.assertEqual(spellCard.combatStat.atk, 0)
+        self.assertEqual(spellCard.combatStat.defence, 3)
+        self.assertEqual(spellCard.combatStat.heal, 0)
+        self.assertEqual(spellCard.combatStat.target, None)
+        self.assertEqual(spellCard.currency, "bleu")
+        self.assertEqual(spellCard.cost, 3)
+        self.assertEqual(spellCard.talent, ["Muraille"])
+        self.assertEqual(spellCard.race, "artificiel")
+        self.assertEqual(spellCard.weaponType, None)
+        self.assertEqual(spellCard.elementType, ["feu"])
+        self.assertEqual(spellCard.typeSort, "invocation")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
