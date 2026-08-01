@@ -123,6 +123,7 @@ class Application(tk.Tk):
         self.lblfont = Font(self, family='Consolas',size=10,weight='bold',slant='italic')
         self.itemfont= Font(self, family='Courier New',size=12,weight='bold',slant='italic')
         self.cmbfont = Font(self, family='Consolas',size=16,weight='normal',slant='italic')
+        self.frmfont = Font(self, family="Times", size=12, weight="bold", slant="roman")
         
         # ---------------------------------------------------------------------
         self.protocol('WM_DELETE_WINDOW',self.Quit)
@@ -136,8 +137,13 @@ class Application(tk.Tk):
         self.cree_widgets()
     
     def init_variables(self):
-        self.cardtypelist:list = ["creature", "equipement", "spell"] 
+        self.cardtypelist:list = ["creature", "equipement", "spell"]
         self.vcardtype = tk.StringVar(value=self.cardtypelist[0])
+        self.itemtypelist:list = ["arme",]
+        self.vitemtype = tk.StringVar(value=self.itemtypelist[0])
+        self.typesortlist:list = readRules('sort')
+        self.vtypesort = tk.StringVar(value=self.typesortlist[0])
+
         self.armeslist = readRules('armes')
         self.vamres = tk.StringVar(value=self.armeslist[0])
         self.elementslist = readRules('elements')
@@ -146,27 +152,89 @@ class Application(tk.Tk):
         self.vmonnaie = tk.StringVar(value=self.monnaielist[0])
         self.raceslist = readRules('races')
         self.vraces = tk.StringVar(value=self.raceslist[0])
-        self.sortlist = readRules('sort')
-        self.vsort = tk.StringVar(value=self.sortlist[0])
         # ---------------------------------------------------------------------
+        self.vname = tk.StringVar()
         # ---------------------------------------------------------------------
-        
     
     def cree_widgets(self):
         globalframe = My_LabelFrame(self,cspan=20,rspan=20,pad=(2,2,2,2),sticky="nsew")
-        titleframe = My_LabelFrame(globalframe,col=4,row=0,cspan=12,bg="#FBE6C8",pad=(2,2,0,0),sticky="ew")
-        tk.Label(titleframe,text=" Type de carte à créer :",bg=titleframe.cget('bg'),
-                                              font=self.ttlfont).grid(columnspan=4,sticky="new")
-        self.comboxCardType = ttk.Combobox(titleframe,background=titleframe.cget('bg'),
-                                font=self.cmbfont,postcommand=None,values=self.cardtypelist,
-                                    state="readonly",name="!comboxCardType",textvariable=self.vcardtype)
-        self.comboxCardType.grid(column=4,row=0,columnspan=8,sticky="new")
         # ---------------------------------------------------------------------
-        self.creatureFrame = My_LabelFrame(globalframe,col=0,row=1,cspan=20,rspan=19,pad=(2,2,10,10))
-        tk.Label(self.creatureFrame,text=" Nom du personnage :",bg=self.creatureFrame.cget('bg'),
-                                              anchor="w",font=self.itemfont).grid(columnspan=2,pady=20,sticky="new")
+        titleframe = My_LabelFrame(globalframe,col=3,row=0,cspan=14,bg="#FBE6C8",pad=(2,2,0,0),sticky="ew")
+        tk.Label(titleframe,text=" Type de carte à créer :",bg=titleframe.cget('bg'),
+                                              font=self.ttlfont).grid(columnspan=6,sticky="new")
+        self.comboxCardType = ttk.Combobox(titleframe,background=titleframe.cget('bg'),
+                                        font=self.cmbfont,postcommand=None,values=self.cardtypelist,
+                                             state="readonly",name="!comboxCardType",textvariable=self.vcardtype)
+        self.comboxCardType.bind("<<ComboboxSelected>>",self.specificFrame)
+        self.comboxCardType.grid(column=6,row=0,columnspan=8,sticky="new")
+        # ---------------------------------------------------------------------
+        self.cardtypeFrame = My_LabelFrame(globalframe,col=0,row=1,cspan=20,rspan=19,pad=(2,2,10,10))
+        tk.Label(self.cardtypeFrame,text="Type de carte : ",
+                               font=self.itemfont).grid(row=0,column=0,columnspan=2,padx=10,pady=10,sticky="new")
+        tk.Label(self.cardtypeFrame,textvariable=self.vcardtype,width=16,
+                      font=self.itemfont,state="disabled").grid(row=0,column=2,columnspan=4,pady=10,sticky="nw")
+        tk.Label(self.cardtypeFrame,text=" Nom du personnage :",bg=self.cardtypeFrame.cget('bg'),
+                            anchor="w",font=self.itemfont).grid(row=0,column=8,columnspan=4,pady=10,sticky="ne")
+        tk.Entry(self.cardtypeFrame,bg='ivory',textvariable=self.vname,
+                                                   font=self.itemfont).grid(column=12,row=0,pady=10,sticky="new")
+        # ---------- frame des attributs communs à toutes les carte -----------
         
         
+        # ---------- frame des attributs spécifiques à Equipement -----------
+        self.equipementFrame = My_LabelFrame(self.cardtypeFrame,col=0,row=18,cspan=20,bg="#E9FAD8",name="!equipementFrame",sticky="sew")
+        tk.Label(self.equipementFrame,anchor="w",bg=self.equipementFrame.cget('bg'),text=" Type d'équipement :",
+                                                    font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="ew")
+        self.equipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
+                                        font=self.cmbfont,postcommand=None,values=self.itemtypelist,
+                                             state="readonly",name="!equipementCombobox",textvariable=self.vitemtype)
+        self.equipCombobox.grid(column=2,row=0,columnspan=4,sticky="ew")
+        # -------------- frame des attributs spécifiques à Sort ---------------
+        self.spellFrame = My_LabelFrame(self.cardtypeFrame,col=0,row=18,cspan=20,bg="#D8E6FA",name="!spellFrame",sticky="sew")
+        tk.Label(self.spellFrame,anchor="w",bg=self.spellFrame.cget('bg'),text=" Type de sort :",
+                                              font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="ew")
+        self.spellCombobox = ttk.Combobox(self.spellFrame,background=self.spellFrame.cget('bg'),
+                                        font=self.cmbfont,postcommand=None,values=self.typesortlist,
+                                             state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
+        self.spellCombobox.grid(column=2,row=0,columnspan=4,sticky="ew")
+        # ---------------------------------------------------------------------
+        self.framelist = set({self.equipementFrame,self.spellFrame})
+        self.comboxCardType.event_generate("<<ComboboxSelected>>")
+        # ---------------------------------------------------------------------
+
+    def specificFrame_old(self, event:tk.Event=None):
+        w = event.widget if event else self.comboxCardType
+        if w.get() != "creature":
+            for remove_frame in set(filter(lambda lf: w.get() not in lf.name(), self.framelist)):
+                print(f"frame removed: {remove_frame.name()}")
+                remove_frame.grid_remove() 
+                # -------------------------------------------------------------
+                grid_frame = list(self.framelist - set({remove_frame}))
+                #if grid_frame:
+                grid_frame = grid_frame[0]
+                label = f" Attribut spécifique au type de carte '{w.get()}'"
+                grid_frame.configure(bg="#E9FAD8",text=label,font=self.frmfont)
+                print(f"frame grid: {grid_frame.name()} - w.get(): {w.get()}")
+                grid_frame.grid()
+        else:
+            [frame.grid_remove() for frame in self.framelist]        
+             
+
+    def specificFrame(self, event:tk.Event=None):
+        colordico:dict = {"equipement":"#E9FAD8","spell":"#D8E6FA"}
+        w = event.widget if event else self.comboxCardType
+        if w.get() != "creature":
+            for remove_frame in set(filter(lambda lf: w.get() not in lf.name(), self.framelist)):
+                print(f"frame removed: {remove_frame.name()}")
+                remove_frame.grid_remove() 
+                # -------------------------------------------------------------
+            for grid_frame in (self.framelist - set({remove_frame})):
+                label = f" Attribut spécifique au type de carte '{w.get()}'"
+                grid_frame.configure(bg=colordico[w.get()],text=label,font=self.frmfont)
+                print(f"frame grid: {grid_frame.name()} - w.get(): {w.get()}")
+                grid_frame.grid()
+        else:
+            [frame.grid_remove() for frame in self.framelist]        
+             
         
     def Quit(self):
         self.after(500, self.destroy)
