@@ -132,6 +132,7 @@ class Application(tk.Tk):
         self.rowconfigure(list(range(1,20)), minsize=28, weight=1)
         self.rowconfigure(0, minsize=28, weight=0)
         self.minsize(width=800, height=560)
+        self.anchor('nw')
         
         self.init_variables()
         self.cree_widgets()
@@ -143,6 +144,8 @@ class Application(tk.Tk):
         self.vitemtype = tk.StringVar(value=self.itemtypelist[0])
         self.typesortlist:list = readRules('sort')
         self.vtypesort = tk.StringVar(value=self.typesortlist[0])
+        self.curencytypelist:list = readRules('monnaie')
+        self.vcurencytype = tk.StringVar(value=self.curencytypelist[-1]) 
 
         self.armeslist = readRules('armes')
         self.vamres = tk.StringVar(value=self.armeslist[0])
@@ -151,51 +154,78 @@ class Application(tk.Tk):
         self.monnaielist = readRules('monnaie')
         self.vmonnaie = tk.StringVar(value=self.monnaielist[0])
         self.raceslist = readRules('races')
-        self.vraces = tk.StringVar(value=self.raceslist[0])
+        self.vraces = tk.StringVar(value=self.raceslist[3])
         # ---------------------------------------------------------------------
         self.vname = tk.StringVar()
+        self.vcost = tk.IntVar(value=1)
         # ---------------------------------------------------------------------
     
     def cree_widgets(self):
         globalframe = My_LabelFrame(self,cspan=20,rspan=20,pad=(2,2,2,2),sticky="nsew")
         # ---------------------------------------------------------------------
-        titleframe = My_LabelFrame(globalframe,col=3,row=0,cspan=14,bg="#FBE6C8",pad=(2,2,0,0),sticky="ew")
+        titleframe = My_LabelFrame(globalframe,col=2,row=0,cspan=16,bg="#FBE6C8",pad=(2,2,0,0),sticky="ew")
         tk.Label(titleframe,text=" Type de carte à créer :",bg=titleframe.cget('bg'),
-                                              font=self.ttlfont).grid(columnspan=6,sticky="new")
+                                      font=self.ttlfont).grid(column=0,row=0,columnspan=8,sticky="new")
         self.comboxCardType = ttk.Combobox(titleframe,background=titleframe.cget('bg'),
                                         font=self.cmbfont,postcommand=None,values=self.cardtypelist,
                                              state="readonly",name="!comboxCardType",textvariable=self.vcardtype)
+        self.comboxCardType.grid(column=8,row=0,columnspan=8,sticky="new")
         self.comboxCardType.bind("<<ComboboxSelected>>",self.specificFrame)
-        self.comboxCardType.grid(column=6,row=0,columnspan=8,sticky="new")
         # ---------------------------------------------------------------------
-        self.cardtypeFrame = My_LabelFrame(globalframe,col=0,row=1,cspan=20,rspan=19,pad=(2,2,10,10))
-        tk.Label(self.cardtypeFrame,text="Type de carte : ",
-                               font=self.itemfont).grid(row=0,column=0,columnspan=2,padx=10,pady=10,sticky="new")
-        tk.Label(self.cardtypeFrame,textvariable=self.vcardtype,width=16,
-                      font=self.itemfont,state="disabled").grid(row=0,column=2,columnspan=4,pady=10,sticky="nw")
-        tk.Label(self.cardtypeFrame,text=" Nom du personnage :",bg=self.cardtypeFrame.cget('bg'),
-                            anchor="w",font=self.itemfont).grid(row=0,column=8,columnspan=4,pady=10,sticky="ne")
-        tk.Entry(self.cardtypeFrame,bg='ivory',textvariable=self.vname,
-                                                   font=self.itemfont).grid(column=12,row=0,pady=10,sticky="new")
+        typeframe = My_LabelFrame(globalframe,col=0,row=1,cspan=10,bg=globalframe.cget('bg'),
+                                                                         bd=1,relief="solid",sticky="new")
+        tk.Label(typeframe,text="   Type de carte : ",bg=globalframe.cget('bg'),anchor="nw",
+                               font=self.itemfont).grid(row=0,column=0,columnspan=5,pady=4,sticky="nw")
+        tk.Label(typeframe,textvariable=self.vcardtype,width=16,bg=globalframe.cget('bg'),
+            font=self.cmbfont,state="disabled").grid(row=0,column=5,columnspan=5,padx=3,sticky="nw")
         # ---------- frame des attributs communs à toutes les carte -----------
+        framenom = My_LabelFrame(globalframe,col=10,row=1,cspan=10,bg=globalframe.cget('bg'),
+                                                                         bd=1,relief="solid",sticky="new")
+        tk.Label(framenom,text="Nom :",bg=framenom.cget('bg'),
+                            anchor="w",font=self.itemfont).grid(row=0,column=0,columnspan=2,pady=4,sticky="nw")
+        tk.Entry(framenom,bg='ivory',textvariable=self.vname,width=12,
+                            font=self.itemfont).grid(column=2,columnspan=4,row=0,pady=4,ipady=1,sticky="nw")
+        self.comboxRaceType = ttk.Combobox(framenom,background=framenom.cget('bg'),width=14,
+                                        font=self.itemfont,postcommand=None,values=self.raceslist,
+                                             state="readonly",name="!comboxRacesType",textvariable=self.vraces)
+        self.comboxRaceType.grid(column=6,row=0,columnspan=4,pady=4,sticky="nw")
+        # ---------------------------------------------------------------------
+        framecost = My_LabelFrame(globalframe,col=0,row=2,cspan=10,bg=globalframe.cget('bg'),
+                                                                         bd=1,relief="solid",sticky="new") 
+        tk.Label(framecost,text="Coût de la carte :",
+                               font=self.itemfont).grid(row=0,column=0,columnspan=5,pady=4,sticky="nw")
+        tk.Entry(framecost,bg='ivory',textvariable=self.vcost,width=3,
+                                  font=self.itemfont).grid(column=4,row=0,columnspan=2,pady=4,sticky="n")
+        self.curencyCombobox = ttk.Combobox(framecost,background=globalframe.cget('bg'),width=10,
+                                            font=self.itemfont,postcommand=None,values=self.curencytypelist,
+                                                state="readonly",name="!curencyCombobox",textvariable=self.vcurencytype)
+        self.curencyCombobox.grid(column=6,row=0,columnspan=4,padx=2,pady=4,sticky="new")
+        # ---------------------------------------------------------------------
+        
+        # ---------------------------------------------------------------------
+        
+        
+        
         
         
         # ---------- frame des attributs spécifiques à Equipement -----------
-        self.equipementFrame = My_LabelFrame(self.cardtypeFrame,col=0,row=18,cspan=20,bg="#E9FAD8",name="!equipementFrame",sticky="sew")
-        tk.Label(self.equipementFrame,anchor="w",bg=self.equipementFrame.cget('bg'),text=" Type d'équipement :",
-                                                    font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="ew")
+        #self.equipementFrame = My_LabelFrame(self.cardtypeFrame,col=0,row=18,cspan=20,bg="#E9FAD8",name="!equipementFrame",sticky="sew")
+        self.equipementFrame = My_LabelFrame(globalframe,col=0,row=19,cspan=20,bg="#E9FAD8",name="!equipementFrame",sticky="sew")
+        tk.Label(self.equipementFrame,anchor="center",bg=self.equipementFrame.cget('bg'),text=" Type d'équipement :",
+                                                    font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="w")
         self.equipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
-                                        font=self.cmbfont,postcommand=None,values=self.itemtypelist,
+                                        font=self.itemfont,postcommand=None,values=self.itemtypelist,
                                              state="readonly",name="!equipementCombobox",textvariable=self.vitemtype)
-        self.equipCombobox.grid(column=2,row=0,columnspan=4,sticky="ew")
+        self.equipCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
         # -------------- frame des attributs spécifiques à Sort ---------------
-        self.spellFrame = My_LabelFrame(self.cardtypeFrame,col=0,row=18,cspan=20,bg="#D8E6FA",name="!spellFrame",sticky="sew")
-        tk.Label(self.spellFrame,anchor="w",bg=self.spellFrame.cget('bg'),text=" Type de sort :",
-                                              font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="ew")
+        #self.spellFrame = My_LabelFrame(self.cardtypeFrame,col=0,row=18,cspan=20,bg="#D8E6FA",name="!spellFrame",sticky="sew")
+        self.spellFrame = My_LabelFrame(globalframe,col=0,row=19,cspan=20,bg="#D8E6FA",name="!spellFrame",sticky="sew")
+        tk.Label(self.spellFrame,anchor="center",bg=self.spellFrame.cget('bg'),text=f"{' Type de sort :':>20}",
+                                              font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="w")
         self.spellCombobox = ttk.Combobox(self.spellFrame,background=self.spellFrame.cget('bg'),
-                                        font=self.cmbfont,postcommand=None,values=self.typesortlist,
+                                        font=self.itemfont,postcommand=None,values=self.typesortlist,
                                              state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
-        self.spellCombobox.grid(column=2,row=0,columnspan=4,sticky="ew")
+        self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
         # ---------------------------------------------------------------------
         self.framelist = set({self.equipementFrame,self.spellFrame})
         self.comboxCardType.event_generate("<<ComboboxSelected>>")
@@ -211,8 +241,8 @@ class Application(tk.Tk):
                 grid_frame = list(self.framelist - set({remove_frame}))
                 #if grid_frame:
                 grid_frame = grid_frame[0]
-                label = f" Attribut spécifique au type de carte '{w.get()}'"
-                grid_frame.configure(bg="#E9FAD8",text=label,font=self.frmfont)
+                label = f" Attribut spécifique au type de carte '{w.get()}' "
+                grid_frame.configure(bg="#E9FAD8",text=f"{label:^50}",font=self.frmfont)
                 print(f"frame grid: {grid_frame.name()} - w.get(): {w.get()}")
                 grid_frame.grid()
         else:
