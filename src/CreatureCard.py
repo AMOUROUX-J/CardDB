@@ -25,7 +25,7 @@ class Creature(Card):
             defence (int, optional): valeur de défense. Defaults to 0.
             heal (int, optional): valeur de soin. Defaults to 0.
             target (str, optional): type de ciblage. Defaults to "mono".
-            weaponType (str, optional): type d'are équipable. Defaults to None.
+            weaponType (str, optional): type d'arme équipable. Defaults to None.
             talent (_type_, optional): si à talent ses talents. Defaults to None.
 
         Raises:
