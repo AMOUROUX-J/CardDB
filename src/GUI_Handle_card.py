@@ -38,6 +38,7 @@ import tkinter.ttk as ttk
 import os.path as osp
 
 from main import writeFile
+from equipmentCard import Equipment
 from CreatureCard import Creature
 from cardLogics import readRules
 from tkinter.font import Font
@@ -217,7 +218,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self, className = "Tk", useTk = True)
 
         self.MessageBox = Win_MessageBox(self)  
-        self.state_bar = Window_StateBar(self,"",0,0,9,cspan=20,bg='tan',pady=3,txtfont=('Consolas 10 bold italic'))                                         
+        self.state_bar = Window_StateBar(self,"",0,0,11,cspan=20,bg='tan',pady=3,txtfont=('Consolas 10 bold italic'))                                         
         self.state_bar.message = " Info : Appuyez sur 'F1' pour la fenètre 'A propos'"
 
         self.ttlfont = Font(self, family='Courier',size=14,weight='bold',slant='italic')
@@ -231,8 +232,8 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         self.bind('<F1>', self.fenetre_a_propos)
         self.columnconfigure(list(range(20)), minsize=40, weight=1)
-        self.rowconfigure(list(range(10)), minsize=24, weight=0)
-        self.minsize(width=800, height=350)
+        self.rowconfigure(list(range(11)), minsize=32, weight=0)
+        self.minsize(width=800, height=410)
         self.anchor('nw')
         
         self.init_variables()
@@ -263,6 +264,8 @@ class Application(tk.Tk):
         self.vmonnaie = tk.StringVar(value=self.monnaielist[0])
         self.raceslist = readRules('races')
         self.vraces = tk.StringVar(value=self.raceslist[3])
+        self.vracesequip = tk.StringVar(value=["None",])
+        self.multiracelist = set()
         # ---------------------------------------------------------------------
         self.vname = tk.StringVar()
         self.vlabelname = tk.StringVar(value=" Nom de la créature à créer :")
@@ -281,7 +284,7 @@ class Application(tk.Tk):
         """ Création de tous les widgets de la fenètre principale
             Configuration et affichage/masquage des widgets en dynamique (gestion des évènements)
         """
-        globalframe = My_LabelFrame(self,cspan=20,rspan=8,pad=(2,2,2,2),sticky="nsew")
+        globalframe = My_LabelFrame(self,cspan=20,rspan=9,pad=(2,2,2,2),sticky="nsew")
         # ---------------------------------------------------------------------
         titleframe = My_LabelFrame(globalframe,col=2,row=0,cspan=16,bg="#FBE6C8",pad=(2,2,0,0),sticky="ew")
         tk.Label(titleframe,text=" Type de carte à créer :",bg=titleframe.cget('bg'),
@@ -304,6 +307,7 @@ class Application(tk.Tk):
                                       font=self.itemfont,postcommand=None,values=self.raceslist,
                                           state="readonly",name="!comboxRacesType",textvariable=self.vraces)
         self.comboxRaceType.grid(column=12,row=0,columnspan=8,pady=4,sticky="nw")
+        
         # ---------------------------------------------------------------------
         framecost = My_LabelFrame(globalframe,col=0,row=2,cspan=10,bg=globalframe.cget('bg'),
                                                                          bd=1,relief="solid",sticky="new") 
@@ -324,7 +328,7 @@ class Application(tk.Tk):
                                             font=self.itemfont,postcommand=None,values=self.talentstypelist,
                                                 state="readonly",name="!talentsCombobox",textvariable=self.vtalentstype)
         self.talentsCombobox.grid(column=3,row=0,columnspan=7,padx=8,pady=4,sticky="new")
-        buttontalents = tk.Button(frametalents,text="Ajouter à la liste des talents",font=self.lblfont,
+        tk.Button(frametalents,text="Ajouter à la liste des talents",font=self.lblfont,
                                         command=self.__add_talent).grid(column=0,row=1,columnspan=10,padx=3,sticky="ew")
         tk.Label(frametalents,text=" Elément(s) :",bg=frametalents.cget('bg'),
                                font=self.itemfont).grid(row=2,column=0,columnspan=3,pady=4,sticky="nw")
@@ -332,7 +336,7 @@ class Application(tk.Tk):
                                             font=self.itemfont,postcommand=None,values=list(self.elementstypelist),
                                                 state="readonly",name="!elementsCombobox",textvariable=self.velementstype)
         self.elementsCombobox.grid(column=3,row=2,columnspan=7,padx=8,pady=4,sticky="new")
-        buttonelements = tk.Button(frametalents,text="Ajouter à la liste des éléments",font=self.lblfont,
+        tk.Button(frametalents,text="Ajouter à la liste des éléments",font=self.lblfont,
                                         command=self.__add_element).grid(column=0,row=3,columnspan=10,padx=3,sticky="ew")
         tk.Label(frametalents,text=" Arme équipable : ",bg=frametalents.cget('bg'),
                                font=self.itemfont).grid(row=4,column=0,columnspan=3,pady=4,sticky="nw")
@@ -392,8 +396,17 @@ class Application(tk.Tk):
                                                 state="readonly",name="!armesCombobox",textvariable=self.varmesequip)
         self.armesEquipCombobox.grid(column=8,row=0,columnspan=4,pady=2,sticky="w")
         self.armesEquipCombobox.set(self.armeslist[2])
+        tk.Label(self.equipementFrame,text=" Races utilisants cette défense :",bg=self.equipementFrame.cget('bg'),
+                               font=self.itemfont).grid(row=1,column=0,columnspan=3,sticky="w")
+        self.racesEquipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
+                                        font=self.itemfont,postcommand=None,values=list(self.raceslist),
+                                                state="readonly",name="!racesCombobox",textvariable=self.vracesequip)
+        self.racesEquipCombobox.grid(column=3,row=1,columnspan=4,pady=2,sticky="w")
+        tk.Button(self.equipementFrame,text="Ajouter à la liste des races",font=self.lblfont,
+                                        command=self.__add_race).grid(column=7,row=1,columnspan=13,padx=3,sticky="ew")
+        self.racesEquipCombobox.set("None")
         # -------------- frame des attributs spécifiques à Sort ---------------
-        self.spellFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,bg="#D8E6FA",name="!spellFrame",sticky="sew")
+        self.spellFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,bg="#D8E6FA",name="!spellFrame",sticky="sew")
         tk.Label(self.spellFrame,anchor="center",bg=self.spellFrame.cget('bg'),text=f"{' Type de sort :':>20}",
                                               font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="w")
         self.spellCombobox = ttk.Combobox(self.spellFrame,background=self.spellFrame.cget('bg'),
@@ -401,11 +414,11 @@ class Application(tk.Tk):
                                              state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
         self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
         # ----------------- frame buttons save/default/cancel -----------------
-        buttonFrame = My_LabelFrame(self,col=0,row=8,cspan=20,pad=(2,0,0,3))
+        buttonFrame = My_LabelFrame(self,col=0,row=10,cspan=20,pad=(2,0,0,3))
         tk.Button(buttonFrame,text=" RàZ Défaut ",bg="#FDEED0",command=None,
                                 font=self.frmfont).grid(column=3,row=0,columnspan=2,sticky="ew")
-        tk.Button(buttonFrame,text=" Enregistrer la carte ",bg="#C9FFD3",command=None,
-                                font=self.frmfont).grid(column=9,row=0,columnspan=2,sticky="ew")
+        tk.Button(buttonFrame,bg="#C9FFD3",font=self.frmfont,command=self.save_CARDDB_card,
+                                text=" Enregistrer la carte ").grid(column=9,row=0,columnspan=2,sticky="ew")
         tk.Button(buttonFrame,text=" Annuler/Quitter ",command=self.Quit,bg="#FCC6C6",
                                 font=self.frmfont).grid(column=15,row=0,columnspan=2,sticky="ew")
         # ---------------------------------------------------------------------
@@ -415,24 +428,30 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
     
     def __add_talent(self, event:tk.Event=None):
-        """ Méthode privée de création de la liste des talents """
-        self.multitalentlist.add(self.vtalentstype.get())
-        print(f"self.multitalentlist: {self.multitalentlist}")
+        """ Méthode privée de création du set() des talents """
+        if not self.vtalentstype.get() == 'None':
+            self.multitalentlist.add(self.vtalentstype.get())
         
     def get_talents(self) -> list:
-        """ Retourne la liste des 'talents' par conversion
-            du set() en list()                              """
+        """ Retourne la liste des 'talents' par conversion en list() """
         return list(self.multitalentlist)           
     
     def __add_element(self, event:tk.Event=None):
-        """ Méthode privée de création de la liste des éléments """
-        self.multielementlist.add(self.velementstype.get())
-        print(f"self.multielementlist: {self.multielementlist}")
+        """ Méthode privée de création du set() des éléments """
+        if not self.velementstype.get() == 'None':
+            self.multielementlist.add(self.velementstype.get())
         
     def get_elements(self) -> list:
-        """ Retourne la liste des 'elements' par conversion
-            du set() en list()                              """
+        """ Retourne la liste des 'elements' par conversion en list() """
         return list(self.multielementlist)                 
+
+    def __add_race(self, event:tk.Event=None):
+        """ Méthode privée de création du set() des races des équipements """
+        self.multiracelist.add(self.vracesequip.get())
+            
+    def get_races(self) -> list:
+        """ Retourne la liste des 'races équipables' par conversion en list() """
+        return list(self.multiracelist)                 
 
     def specificFrame(self, event:tk.Event=None):
         """ Méthode de gestion dynamique d'affichage des widgets qui est déclenchée
@@ -462,26 +481,75 @@ class Application(tk.Tk):
         dummy_name = f" Nom{elidedico[w.get()]}{w.get()}"            
         self.vlabelname.set(f"{dummy_name:<22} :")
 
-    def __valid_creature__(self) -> bool:
+    def __valid_CARDDB_card__(self) -> bool:
         if not self.vname.get() or len(self.vname.get()) < 2:
             return False
-        if self.vraces.get() == None:
-            return False
-        if self.get_elements():
+        if not self.get_elements():
             return False
         if not self.vcost.get() > 0:
             return False
         return True
+        
+    def __valid_creature(self) -> bool:
+        if self.__valid_CARDDB_card__():
+            if self.vraces.get() == None:
+                return False
+        return True
     
+    def __valid_equipement(self) -> bool:
+        if self.__valid_CARDDB_card__():
+            if not self.varmesequip.get():
+                return False
+            if self.velementstype.get() == "None":
+                return False 
+            if self.vracesequip == []:
+                return False        
+        return True
     
+    def save_CARDDB_card(self):
+        match self.vcardtype.get():
+            case 'creature':
+                typecard, name = osp.basename(self.__save_creature()).split('_')
+                if typecard == "creature":
+                    self.state_bar.update_vltexte(f" Info : Carte créature '{name}' sauvegardée avec succès")
+            case 'equipement':
+                typecard, name = osp.basename(self.__save_equipement()).split('_')
+                if typecard == "equipement":
+                    self.state_bar.update_vltexte(f" Info : Carte créature '{name}' sauvegardée avec succès")
+
     
-    def __save_creature(self) -> bool:
-        if not self.__valid_creature__():
+    def __save_equipement(self) -> str:
+        if not self.__valid_equipement():
+            self.state_bar.update_vltexte(" Info : Carte 'Equipement' non crée, incompatibilité de données pour la carte demandée")
+            return False
+        # ------------------- création de l'objet 'Creature' ------------------
+        equipement_card = Equipment(weaponType=self.varmesequip.get(),
+                                    elementType=self.get_elements(),
+                                    itemType=self.vitemtype.get(),
+                                    name=self.vname.get(),
+                                    cost=self.vcost.get(),
+                                    currency=self.vcurencytype.get(),
+                                    hp=self.vhp.get(),
+                                    crit=self.vtypecrit.get(),
+                                    atk=self.vatk.get(),
+                                    defense=self.vdef.get(),
+                                    heal=self.vheal.get(),
+                                    target=self.vtypetarget.get(),
+                                    talent=self.get_talents(),
+                                    race=self.get_races()
+                                    )
+        print(f"equipement_card: {equipement_card}")
+        dummy = writeFile(equipement_card,overwrite=True)
+        print(f"dummy: {dummy}")
+        return dummy
+    
+    def __save_creature(self) -> str:
+        if not self.__valid_creature():
             self.state_bar.update_vltexte(" Info : Carte 'Créature' non crée, incompatibilité de données pour la carte demandée")
             return False
         # ------------------- création de l'objet 'Creature' ------------------
         creature_card = Creature(race=self.vraces.get(),
-                                 elementType=self.multielementlist,
+                                 elementType=self.get_elements(),
                                  name=self.vname.get().strip().capitalize(),
                                  cost=self.vcost.get(),
                                  currency=self.vcurencytype.get(),
@@ -494,7 +562,7 @@ class Application(tk.Tk):
                                  weaponType=self.varmes.get(),
                                  talent=self.get_talents()                                 
                                  )
-        
+        return writeFile(creature_card,overwrite=True)
 
 
 
@@ -529,6 +597,6 @@ if __name__ == "__main__":
         icon = tk.PhotoImage(master=app, file=osp.join(os.getcwd(),'imgsDataDB','carddb.gif'))
         app.wm_iconphoto(True, icon)
     # -------------------------------------------------------------------------
-    app.title("CARDDB Handler v1.0 (c)2025 AMOUROUX Bernard - GUI de saisie des cartes de CARDDB (c)2026 AMOUROUX Jan")
+    app.title("CARDDB GUI v1.0 (c)2025 AMOUROUX Bernard - GUI de saisie des cartes de CARDDB (c)2026 AMOUROUX Jan")
     app.mainloop()
         

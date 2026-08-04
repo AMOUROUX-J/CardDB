@@ -1,0 +1,20 @@
+{
+  "name": "Shelly",
+  "hp": 7,
+  "atk": 0,
+  "def": 0,
+  "heal": 0,
+  "costType": "money",
+  "cost": 2,
+  "talent": [
+    "Leader"
+  ],
+  "types": [
+    "special"
+  ],
+  "crit": 6,
+  "race": "animal",
+  "weapon": "distance",
+  "targeting": "mono",
+  "cardType": "creature"
+}

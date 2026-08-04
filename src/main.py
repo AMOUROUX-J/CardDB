@@ -143,7 +143,7 @@ def writeFile(card:Equipment|Creature|Spell, overwrite: bool = False) -> str:
         FileExistsError: si overwrite == False empêche d'écraser la carte déjà existante
 
     Returns:
-        str: le chemin ou la carte à été enregistrer
+        str: le chemin ou la carte à été enregistrée
     """
     name = card.name
     cardType = card.cardType

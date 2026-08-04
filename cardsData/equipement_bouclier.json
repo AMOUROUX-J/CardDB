@@ -1,0 +1,25 @@
+{
+  "name": "bouclier",
+  "hp": 10,
+  "atk": 0,
+  "def": 0,
+  "heal": 0,
+  "costType": "money",
+  "cost": 1,
+  "talent": [
+    "Kefoudia"
+  ],
+  "types": [
+    "acier"
+  ],
+  "crit": 0,
+  "race": [
+    "humanoide",
+    "artificiel"
+  ],
+  "weapon": "lourd",
+  "targeting": "groupe",
+  "cardType": "equipement",
+  "weaponType": "lourd",
+  "itemType": "arme"
+}

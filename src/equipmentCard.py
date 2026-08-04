@@ -27,7 +27,7 @@ class Equipment(Card):
             heal (int, optional): valeur de soin. Defaults to 0.
             target (str | None, optional): type de ciblage. Defaults to None.
             talent (list[str] | None, optional): si a telents les listes. Defaults to None.
-            race (str, optional): quel race peut équiper cette arme. Defaults to [].
+            race (list[str], optional): quelle race peut s'équiper de cette arme. Defaults to [].
             
         Raises:
             ValueError: si race absent des règles
@@ -57,3 +57,6 @@ class Equipment(Card):
         self.equipmentType = itemType
         self.weaponType = weaponType
         self.race = race
+        
+        def __str__(self) -> str:
+            return f"{self.cardType}, {self.name}"
