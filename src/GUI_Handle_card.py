@@ -38,6 +38,7 @@ import tkinter.ttk as ttk
 import os.path as osp
 
 from main import writeFile
+from CreatureCard import Creature
 from cardLogics import readRules
 from tkinter.font import Font
 
@@ -271,7 +272,7 @@ class Application(tk.Tk):
         self.typecritlist:list = [0,2,6,8,20]
         self.vtypecrit = tk.IntVar(value=self.typecritlist[0])
         self.typetargetlist:list = ["mono","zone","groupe",None]
-        self.vtypetarget = tk.IntVar(value=self.typetargetlist[0]) 
+        self.vtypetarget = tk.StringVar(value=self.typetargetlist[0]) 
         self.vatk = tk.IntVar(value=0)
         self.vdef = tk.IntVar(value=0)
         # ---------------------------------------------------------------------
@@ -460,6 +461,42 @@ class Application(tk.Tk):
             [frame.grid_remove() for frame in self.framelist]
         dummy_name = f" Nom{elidedico[w.get()]}{w.get()}"            
         self.vlabelname.set(f"{dummy_name:<22} :")
+
+    def __valid_creature__(self) -> bool:
+        if not self.vname.get() or len(self.vname.get()) < 2:
+            return False
+        if self.vraces.get() == None:
+            return False
+        if self.get_elements():
+            return False
+        if not self.vcost.get() > 0:
+            return False
+        return True
+    
+    
+    
+    def __save_creature(self) -> bool:
+        if not self.__valid_creature__():
+            self.state_bar.update_vltexte(" Info : Carte 'Créature' non crée, incompatibilité de données pour la carte demandée")
+            return False
+        # ------------------- création de l'objet 'Creature' ------------------
+        creature_card = Creature(race=self.vraces.get(),
+                                 elementType=self.multielementlist,
+                                 name=self.vname.get().strip().capitalize(),
+                                 cost=self.vcost.get(),
+                                 currency=self.vcurencytype.get(),
+                                 hp=self.vhp.get(),
+                                 crit=self.vtypecrit.get(),
+                                 atk=self.vatk.get(),
+                                 defense=self.vdef.get(),
+                                 heal=self.vheal.get(),
+                                 target=self.vtypetarget.get(),
+                                 weaponType=self.varmes.get(),
+                                 talent=self.get_talents()                                 
+                                 )
+        
+
+
 
     def fenetre_a_propos(self, event:tk.Event=None):
         """ Fenêtre-message à propos.

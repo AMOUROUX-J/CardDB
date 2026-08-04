@@ -6,8 +6,11 @@ import cardLogics
 @dataclass
 class Creature(Card):
     def __init__(self,
-                race:str, elementType:list[str],
-                name: str, cost: int, currency: str,
+                race:str, 
+                elementType:list[str],
+                name: str, 
+                cost: int, 
+                currency: str,
                 hp:int, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str="mono",weaponType:str=None, talent: str=None # pyright: ignore[reportArgumentType]
                 ) -> None:
         """

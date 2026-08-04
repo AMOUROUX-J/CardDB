@@ -1,6 +1,5 @@
 from pathlib import Path
 from SpellCard import Spell
-import cardLogics
 from equipmentCard import Equipment
 from CreatureCard import Creature
 import json
