@@ -2,7 +2,7 @@
 """
 CARDDB Handler - Une étude Python POO pour la saisie des données des types de cartes 
 'creature', 'equipement' et 'spell' du jeu CARDDB en mode graphique (TKinter).
-Copyright (c) 2026 Jan AMOUROUX - étude moteur du jeu
+Copyright (c) 2026 Jan AMOUROUX - étude moteur du jeu pour la création des cartes. 
 Copyright (C) 2026 Bernard AMOUROUX - étude Tkinter
 
 This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-CARDDB Handler (c) 2026 Bernard AMOUROUX
+MIT License - CARDDB (c) 2026 Jan AMOUROUX 
+GPL3 License - CARDDB Handler GUI (c) 2026 Bernard AMOUROUX
+
 This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.
@@ -35,19 +37,24 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import os.path as osp
 
+from main import writeFile
 from cardLogics import readRules
 from tkinter.font import Font
 
 
 class My_LabelFrame(tk.LabelFrame):
-
+    """ classe héritant de tkinter.LabelFrame() qui se crée et se place 
+        sur la grille en une ligne de commandes. Par défaut, la couleur de fond
+        sera 'ivoire', une largeur de bordure de 3, un relief de périmètre 'groove'
+        et un ancrage de label s'il y a au centre en haut. 
+    """
     def __init__(self,master,col=0,row=0,cspan=1,rspan=1,pad=(0,0,0,0),sticky='nsew', *args, **kwargs):
 
         tab_options:dict = {'bg':'ivory', 'bd':3, 'relief':'groove', 'labelanchor':'n'}
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
 
-        tk.LabelFrame.__init__(self,master,*args,**kwargs)        
+        super().__init__(master,*args,**kwargs)        
 
         self.grid(column=col, row=row, columnspan=cspan, rowspan=rspan,
                                   padx=pad[0], pady=pad[1], ipadx=pad[2], ipady=pad[3], sticky=sticky)
@@ -56,12 +63,98 @@ class My_LabelFrame(tk.LabelFrame):
 
     def name(self):
         return f"{self.master}."+self._name
+
         
+class Window_StateBar(tk.Frame):
+    """ Classe créant une barre d'état configurable qui permet l'affichege d'un message
+        d'état pendant une durée déterminée, indéterminée ou immédiate.
+        Méthodes de la classe:
+            update_vltexte : 
+                msg  : message à afficher
+                wait : temps d'affichge du message. défaut 10s
+            tips: wait à 1 pour que le message s'affiche en permanence sans changer defMessage    
+            message :
+                getter : extrait le message en cours.
+                setter : définit le message par défaut
+            tips: pour que le message par défaut soit affiché imméditement, exécuter 'update_vltexte("",0)'                              
+    """
+    def __init__(self, master, message:str, waitime:int, col=0, row=0, cspan=1, sticky="nsew",
+                        defMessage:str=' Info : ', defTime:int=10, txtfont=None, *args, **kwargs):
+        """
+        Attributs du constructeur:
+            master     : Fenètre appelant, objet tkinter.Tk()
+            message    : message à afficher apès l'initialisation pendant 10s par défaut ou par 'waitime'
+            waitime    : temps définissant la durée d'affichage des message avant le retour du message par défaut
+            col, row   : colone et ligne pour le placement dans la grille de la fenètre principale
+            rspan, cspan, sticky : paramètres d'extension des lignes et colones dans la grille
+            defMessage : message défaut qui s'affiche dès la tempo message terminée.
+            defTime    : durée d'affichage des message par défaut 
+            txtfont    : police de caractères pour l'affichage des messages
+        """
+        self.__master = master
+        self.__message = message
+        self.__waitnbr:int = None
+        self.__defaultTime = defTime
+        self.__defaultMsg = defMessage
+        self.__vl_texte = tk.StringVar()
+        self.__wait = waitime
+
+        tab_options:dict = {'bd':1, 'bg':'tan2', 'relief':'groove'}        
+        for key in list(tab_options.keys()):
+            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
+        super().__init__(master, *args, **kwargs)
+        
+        lblfont = ("Courier New",10 ,'bold','italic') if not txtfont else txtfont
+        
+        self.grid(column=col,row=row,columnspan=cspan,padx=2,pady=2,sticky=sticky)
+        
+        tk.Label(self,bd=0,bg=self.cget('bg'),anchor="sw",height=1,font=lblfont,textvariable=self.__vl_texte).grid()
+        self.update_vltexte(defMessage if message=="" else message, waitime)
+
+    def __raz_vltexte__(self):
+        """ methode privée de mise au message par défaut """
+        self.__vl_texte.set(self.__defaultMsg)
+        self.__waitnbr = None
+    
+    def update_vltexte(self, msg:str, wait=10):
+        """ méthode de chargement d'un nouveau message pour affichage le temps désiré """
+        if self.__waitnbr != None:
+            self.after_cancel(self.__waitnbr)
+        if wait == 0:
+            self.__raz_vltexte__()
+        elif wait > 1:
+            self.__waitnbr = self.after(self.__defaultTime if wait==None else (wait*1000) , self.__raz_vltexte__)
+            self.__vl_texte.set(msg)
+        super().update_idletasks()
+
+    @property
+    def message(self) -> str:
+        return self.__vl_texte.get().rstrip()
+    @message.setter
+    def message(self, message:str):
+        self.__defaultMsg = message
+
 
 class Win_MessageBox(tk.Toplevel):
-    
+    """ Classe fournissant une boite de message pour une l'application principale. Une fois initialisé,
+        la fenètre se masque automatiquement et se rend visible lorsqu'on demande à afficher un message.
+        Se masque à nouveau après la validation par ok. Se détruit lorsque l'on quitte l'application.
+        Methodes de la classe:
+            boxtitle : définit le texte de la barre de titre de la fenètre 
+            message  : 
+                getter: pour extraire le message en cours
+                setter: pour monter et afficher la fenètre au premier plan,
+                        intercepter tous les évènements, et afficher le message.
+                        Une fois le bouton ok validé, rend la gestion des évènements
+                        à l'appelant et la fenètre se masque.
+            textfont : change la police de caractère pour les messages suivants    
+    """
     def __init__(self, master:tk.Tk, message:str=None, msgtext=('Consolas 11 bold italic'), *args, **kwargs):
-        
+        """ Attributs du constructeur: 
+                master : objet tkinter.Tk() ou tkinter.Toplevel()
+                message (str): texte qui sera affiché dans la fenètre
+                msgtext : police de caractères des messages d'information
+        """    
         self.__master = master
         self.__name__ = 'win_messagebox'
         self.__vmessage = tk.StringVar(value=message)
@@ -85,10 +178,12 @@ class Win_MessageBox(tk.Toplevel):
     
     @property
     def message(self)->str:
+        """ Retourne le message en cours """
         return self.__vmessage.get()
     
     @message.setter
     def message(self, message):
+        """ Met à jour la variable dynamique et affiche un message  """
         self.__vmessage.set(message)
         if not self.winfo_ismapped():
             self.deiconify()
@@ -96,17 +191,19 @@ class Win_MessageBox(tk.Toplevel):
             self.lift()
         self.update()
     
-    def message_update(self, message:str=""):
-        self.__vmessage.set(message)
-        self.update()        
-    
     def textfont(self, msgtext:str):
+        """ Configure la police de caractères pour l'affichage du message """
         self.messageBox.configure(font=msgtext)
         
     def boxtitle(self, title:str):
+        """ Crée, remplace le titre principal """
         self.title(title)    
     
     def Quit(self, event=None):
+        """ Quitte par tk.Toplevel.withdraw() et NON destroy()
+            Rend à l'appelent l'interception des évènements.
+            La fenètre se masque.
+        """
         self.boxtitle(" Message ")
         self.grab_release()
         self.withdraw()    
@@ -117,8 +214,11 @@ class Application(tk.Tk):
     def __init__(self):
         
         tk.Tk.__init__(self, className = "Tk", useTk = True)
-        
-        
+
+        self.MessageBox = Win_MessageBox(self)  
+        self.state_bar = Window_StateBar(self,"",0,0,9,cspan=20,bg='tan',pady=3,txtfont=('Consolas 10 bold italic'))                                         
+        self.state_bar.message = " Info : Appuyez sur 'F1' pour la fenètre 'A propos'"
+
         self.ttlfont = Font(self, family='Courier',size=14,weight='bold',slant='italic')
         self.lblfont = Font(self, family='Consolas',size=10,weight='bold',slant='italic')
         self.itemfont= Font(self, family='Courier New',size=12,weight='bold',slant='italic')
@@ -128,16 +228,19 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         self.protocol('WM_DELETE_WINDOW',self.Quit)
         # ---------------------------------------------------------------------
+        self.bind('<F1>', self.fenetre_a_propos)
         self.columnconfigure(list(range(20)), minsize=40, weight=1)
-        self.rowconfigure(list(range(1,20)), minsize=28, weight=1)
-        self.rowconfigure(0, minsize=28, weight=0)
-        self.minsize(width=800, height=560)
+        self.rowconfigure(list(range(10)), minsize=24, weight=0)
+        self.minsize(width=800, height=350)
         self.anchor('nw')
         
         self.init_variables()
         self.cree_widgets()
     
     def init_variables(self):
+        """ Définition de toutes les variables de type tkinter.StringVar() ou tkinter.Inrvar()
+            utilisées par l'application.
+        """
         self.cardtypelist:list = ["creature", "equipement", "spell"]
         self.vcardtype = tk.StringVar(value=self.cardtypelist[0])
         self.itemtypelist:list = ["arme","armure"]
@@ -150,30 +253,34 @@ class Application(tk.Tk):
         self.vtalentstype = tk.StringVar(value=self.talentstypelist[-1])
         self.multitalentlist = set()
         self.elementstypelist = readRules('elements')
-        self.velementstype = tk.StringVar(value=self.elementstypelist[0])
+        self.velementstype = tk.StringVar(value=self.elementstypelist[-1])
         self.multielementlist = set()
-
         self.armeslist = readRules('armes')
-        self.varmes = tk.StringVar(value=self.armeslist[0])
+        self.varmes = tk.StringVar(value=self.armeslist[-1])
+        self.varmesequip = tk.StringVar(value=self.armeslist[1])
         self.monnaielist = readRules('monnaie')
         self.vmonnaie = tk.StringVar(value=self.monnaielist[0])
         self.raceslist = readRules('races')
         self.vraces = tk.StringVar(value=self.raceslist[3])
         # ---------------------------------------------------------------------
         self.vname = tk.StringVar()
+        self.vlabelname = tk.StringVar(value=" Nom de la créature à créer :")
         self.vcost = tk.IntVar(value=1)
         self.vhp = tk.IntVar(value=10)
-        self.vheal = tk.IntVar(value=2)
+        self.vheal = tk.IntVar(value=0)
         self.typecritlist:list = [0,2,6,8,20]
         self.vtypecrit = tk.IntVar(value=self.typecritlist[0])
         self.typetargetlist:list = ["mono","zone","groupe",None]
         self.vtypetarget = tk.IntVar(value=self.typetargetlist[0]) 
-        self.vatk = tk.IntVar(value=5)
+        self.vatk = tk.IntVar(value=0)
         self.vdef = tk.IntVar(value=0)
         # ---------------------------------------------------------------------
     
     def cree_widgets(self):
-        globalframe = My_LabelFrame(self,cspan=20,rspan=20,pad=(2,2,2,2),sticky="nsew")
+        """ Création de tous les widgets de la fenètre principale
+            Configuration et affichage/masquage des widgets en dynamique (gestion des évènements)
+        """
+        globalframe = My_LabelFrame(self,cspan=20,rspan=8,pad=(2,2,2,2),sticky="nsew")
         # ---------------------------------------------------------------------
         titleframe = My_LabelFrame(globalframe,col=2,row=0,cspan=16,bg="#FBE6C8",pad=(2,2,0,0),sticky="ew")
         tk.Label(titleframe,text=" Type de carte à créer :",bg=titleframe.cget('bg'),
@@ -183,29 +290,24 @@ class Application(tk.Tk):
                                              state="readonly",name="!comboxCardType",textvariable=self.vcardtype)
         self.comboxCardType.grid(column=8,row=0,columnspan=8,sticky="new")
         self.comboxCardType.bind("<<ComboboxSelected>>",self.specificFrame)
-        # ---------------------------------------------------------------------
-        typeframe = My_LabelFrame(globalframe,col=0,row=1,cspan=10,bg=globalframe.cget('bg'),
-                                                                         bd=1,relief="solid",sticky="new")
-        tk.Label(typeframe,text=" Type de carte à créer :",bg=globalframe.cget('bg'),anchor="nw",
-                               font=self.itemfont).grid(row=0,column=0,columnspan=5,pady=4,sticky="nw")
-        tk.Label(typeframe,textvariable=self.vcardtype,width=16,bg=globalframe.cget('bg'),
-            font=self.cmbfont,state="disabled").grid(row=0,column=5,columnspan=5,padx=3,sticky="nw")
         # ---------- frame des attributs communs à toutes les carte -----------
-        framenom = My_LabelFrame(globalframe,col=10,row=1,cspan=10,bg=globalframe.cget('bg'),
-                                                             pad=(2,0,0,0),bd=1,relief="solid",sticky="new")
-        tk.Label(framenom,text="Nom :",bg=framenom.cget('bg'),
-                            anchor="w",font=self.itemfont).grid(row=0,column=0,columnspan=2,pady=4,sticky="nw")
-        tk.Entry(framenom,bg='ivory',textvariable=self.vname,width=12,
-                            font=self.itemfont).grid(column=2,columnspan=4,row=0,pady=4,ipady=1,sticky="nw")
-        self.comboxRaceType = ttk.Combobox(framenom,background=framenom.cget('bg'),width=14,
+        self.framenom = My_LabelFrame(globalframe,col=0,row=1,cspan=20,bg=globalframe.cget('bg'),
+                                          name="!labelFramenom",pad=(2,0,0,0),bd=1,relief="solid",sticky="new")
+        tk.Label(self.framenom,bg=self.framenom.cget('bg'),textvariable=self.vlabelname,
+                            anchor="w",font=self.itemfont).grid(row=0,column=0,columnspan=4,pady=4,sticky="nw")
+        tk.Entry(self.framenom,bg='ivory',textvariable=self.vname,
+                            font=self.itemfont).grid(column=4,columnspan=3,row=0,pady=4,ipady=1,sticky="nw")
+        tk.Label(self.framenom,bg=self.framenom.cget('bg'),text="Type de créature :",name="!labelTypeCreature",
+                            anchor="w",font=self.itemfont).grid(row=0,column=7,columnspan=4,pady=4,sticky="nw")
+        self.comboxRaceType = ttk.Combobox(self.framenom,background=self.framenom.cget('bg'),
                                       font=self.itemfont,postcommand=None,values=self.raceslist,
                                           state="readonly",name="!comboxRacesType",textvariable=self.vraces)
-        self.comboxRaceType.grid(column=6,row=0,columnspan=4,pady=4,sticky="nw")
+        self.comboxRaceType.grid(column=12,row=0,columnspan=8,pady=4,sticky="nw")
         # ---------------------------------------------------------------------
         framecost = My_LabelFrame(globalframe,col=0,row=2,cspan=10,bg=globalframe.cget('bg'),
                                                                          bd=1,relief="solid",sticky="new") 
-        tk.Label(framecost,text=" Coût de la carte  :",bg=framecost.cget('bg'),
-                               font=self.itemfont).grid(row=0,column=0,columnspan=5,pady=4,sticky="nw")
+        tk.Label(framecost,text=" Coût de la carte      :",bg=framecost.cget('bg'),
+                               font=self.itemfont).grid(row=0,column=0,columnspan=4,pady=4,sticky="nw")
         tk.Entry(framecost,bg='ivory',textvariable=self.vcost,width=3,
                                   font=self.itemfont).grid(column=4,row=0,columnspan=2,pady=4,sticky="n")
         self.curencyCombobox = ttk.Combobox(framecost,background=globalframe.cget('bg'),width=10,
@@ -231,26 +333,15 @@ class Application(tk.Tk):
         self.elementsCombobox.grid(column=3,row=2,columnspan=7,padx=8,pady=4,sticky="new")
         buttonelements = tk.Button(frametalents,text="Ajouter à la liste des éléments",font=self.lblfont,
                                         command=self.__add_element).grid(column=0,row=3,columnspan=10,padx=3,sticky="ew")
-
-        tk.Label(frametalents,text=" Mode de défense:",bg=frametalents.cget('bg'),
+        tk.Label(frametalents,text=" Arme équipable : ",bg=frametalents.cget('bg'),
                                font=self.itemfont).grid(row=4,column=0,columnspan=3,pady=4,sticky="nw")
-        self.itemtypeCombobox = ttk.Combobox(frametalents,background=globalframe.cget('bg'),
-                                            font=self.itemfont,postcommand=None,values=list(self.itemtypelist),
-                                                state="readonly",name="!itemtypeCombobox",textvariable=self.vitemtype)
-        self.itemtypeCombobox.grid(column=3,row=4,columnspan=6,padx=2,pady=4,sticky="new")
-        
-        
-        tk.Label(frametalents,text=" Arme équipable :",bg=frametalents.cget('bg'),
-                               font=self.itemfont).grid(row=5,column=0,columnspan=3,pady=4,sticky="nw")
         self.armesCombobox = ttk.Combobox(frametalents,background=globalframe.cget('bg'),
                                             font=self.itemfont,postcommand=None,values=list(self.armeslist),
                                                 state="readonly",name="!armesCombobox",textvariable=self.varmes)
-        self.armesCombobox.grid(column=3,row=5,columnspan=6,padx=2,pady=4,sticky="new")
-        
-
+        self.armesCombobox.grid(column=3,row=4,columnspan=6,padx=2,pady=4,sticky="new")
         # ---------------------------------------------------------------------
-        texte = " Données statistiques combat "
-        frameproperty = My_LabelFrame(globalframe,col=0,row=3,cspan=10,rspan=5,bd=2,bg=globalframe.cget('bg'),
+        texte = " Données statistiques de combat "
+        frameproperty = My_LabelFrame(globalframe,col=0,row=3,cspan=10,rspan=3,bd=2,bg=globalframe.cget('bg'),
                                                font=self.lblfont,text=texte,pad=(0,7,0,0),relief="ridge",sticky="new")  
         tk.Label(frameproperty,text=" Points de vie   :",bg=frameproperty.cget('bg'),
                                font=self.itemfont).grid(row=0,column=0,columnspan=3,pady=4,sticky="nw")
@@ -280,64 +371,113 @@ class Application(tk.Tk):
                                                 state="readonly",name="!elementsCombobox",textvariable=self.vtypetarget)
         self.targetCombobox.grid(column=5,row=2,columnspan=5,padx=2,pady=4,sticky="new")
         # ---------------------------------------------------------------------
-
-
-        # ---------- frame des attributs spécifiques à Equipement -----------
-        self.equipementFrame = My_LabelFrame(globalframe,col=0,row=19,cspan=20,bg="#E9FAD8",name="!equipementFrame",sticky="sew")
-        tk.Label(self.equipementFrame,anchor="center",bg=self.equipementFrame.cget('bg'),text=" Type d'équipement :",
+        texte = f" Aucun attribut spécifique pour les cartes de type '{self.comboxCardType.get()}' "
+        framecreature = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,font=self.frmfont,text=texte)
+        tk.Label(framecreature,text=f" ",bg=framecreature.cget('bg'),
+                                               font=self.frmfont).grid(column=0,row=0,columnspan=20,sticky="nsew")
+        # ----------- frame des attributs spécifiques à Equipement ------------
+        self.equipementFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,
+                                                                  bg="#E9FAD8",name="!equipementFrame",sticky="sew")
+        tk.Label(self.equipementFrame,anchor="center",bg=self.equipementFrame.cget('bg'),text=" Mode de défense :",
                                                     font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="w")
         self.equipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
                                         font=self.itemfont,postcommand=None,values=self.itemtypelist,
                                              state="readonly",name="!equipementCombobox",textvariable=self.vitemtype)
         self.equipCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
+        tk.Label(self.equipementFrame,text=" Type d'arme :",bg=self.equipementFrame.cget('bg'),
+                               font=self.itemfont).grid(row=0,column=6,columnspan=2,sticky="w")
+        self.armesEquipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
+                                            font=self.itemfont,postcommand=None,values=list(self.armeslist),
+                                                state="readonly",name="!armesCombobox",textvariable=self.varmesequip)
+        self.armesEquipCombobox.grid(column=8,row=0,columnspan=4,pady=2,sticky="w")
+        self.armesEquipCombobox.set(self.armeslist[2])
         # -------------- frame des attributs spécifiques à Sort ---------------
-        self.spellFrame = My_LabelFrame(globalframe,col=0,row=19,cspan=20,bg="#D8E6FA",name="!spellFrame",sticky="sew")
+        self.spellFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,bg="#D8E6FA",name="!spellFrame",sticky="sew")
         tk.Label(self.spellFrame,anchor="center",bg=self.spellFrame.cget('bg'),text=f"{' Type de sort :':>20}",
                                               font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="w")
         self.spellCombobox = ttk.Combobox(self.spellFrame,background=self.spellFrame.cget('bg'),
                                         font=self.itemfont,postcommand=None,values=self.typesortlist,
                                              state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
         self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
+        # ----------------- frame buttons save/default/cancel -----------------
+        buttonFrame = My_LabelFrame(self,col=0,row=8,cspan=20,pad=(2,0,0,3))
+        tk.Button(buttonFrame,text=" RàZ Défaut ",bg="#FDEED0",command=None,
+                                font=self.frmfont).grid(column=3,row=0,columnspan=2,sticky="ew")
+        tk.Button(buttonFrame,text=" Enregistrer la carte ",bg="#C9FFD3",command=None,
+                                font=self.frmfont).grid(column=9,row=0,columnspan=2,sticky="ew")
+        tk.Button(buttonFrame,text=" Annuler/Quitter ",command=self.Quit,bg="#FCC6C6",
+                                font=self.frmfont).grid(column=15,row=0,columnspan=2,sticky="ew")
         # ---------------------------------------------------------------------
         self.framelist = set({self.equipementFrame,self.spellFrame})
         self.comboxCardType.event_generate("<<ComboboxSelected>>")
+        self.state_bar.update_vltexte("",0)
         # ---------------------------------------------------------------------
     
     def __add_talent(self, event:tk.Event=None):
+        """ Méthode privée de création de la liste des talents """
         self.multitalentlist.add(self.vtalentstype.get())
-        print(f"self.multitalentlist: {self.multitalentlist}")         
+        print(f"self.multitalentlist: {self.multitalentlist}")
+        
+    def get_talents(self) -> list:
+        """ Retourne la liste des 'talents' par conversion
+            du set() en list()                              """
+        return list(self.multitalentlist)           
     
     def __add_element(self, event:tk.Event=None):
+        """ Méthode privée de création de la liste des éléments """
         self.multielementlist.add(self.velementstype.get())
-        print(f"self.multielementlist: {self.multielementlist}")         
+        print(f"self.multielementlist: {self.multielementlist}")
+        
+    def get_elements(self) -> list:
+        """ Retourne la liste des 'elements' par conversion
+            du set() en list()                              """
+        return list(self.multielementlist)                 
 
     def specificFrame(self, event:tk.Event=None):
+        """ Méthode de gestion dynamique d'affichage des widgets qui est déclenchée
+            par l'évènement virtuel "<<ComboboxSelected>>" émis lors de la sélection
+            du type de carte 'créature', 'evenement' ou 'spell'.
+        """
+        label_typecreature = self.framenom.nametowidget('!labelTypeCreature')
         colordico:dict = {"equipement":"#E9FAD8","spell":"#D8E6FA"}
+        elidedico:dict = {"creature":" de la ","equipement":" de l'","spell":" de la carte "}
         w = event.widget if event else self.comboxCardType
         if w.get() != "creature":
-            self.vtypetarget.set(self.typetargetlist[-1])
+            label_typecreature.configure(state="disabled")
             self.comboxRaceType.configure(state="disabled")
+            self.vtypetarget.set(self.typetargetlist[-1])
             for remove_frame in set(filter(lambda lf: w.get() not in lf.name(), self.framelist)):
-                print(f"frame removed: {remove_frame.name()}")
                 remove_frame.grid_remove() 
                 # -------------------------------------------------------------
             for grid_frame in (self.framelist - set({remove_frame})):
                 label = f" Attribut spécifique au type de carte '{w.get()}'"
                 grid_frame.configure(bg=colordico[w.get()],text=label,font=self.frmfont)
-                print(f"frame grid: {grid_frame.name()} - w.get(): {w.get()}")
                 grid_frame.grid()
         else:
+            label_typecreature.configure(state="normal")
             self.vtypetarget.set(self.typetargetlist[0])
             self.comboxRaceType.configure(state="normal")
-            [frame.grid_remove() for frame in self.framelist]        
-             
-        
+            [frame.grid_remove() for frame in self.framelist]
+        dummy_name = f" Nom{elidedico[w.get()]}{w.get()}"            
+        self.vlabelname.set(f"{dummy_name:<22} :")
+
+    def fenetre_a_propos(self, event:tk.Event=None):
+        """ Fenêtre-message à propos.
+            Indique le nom du/des auteurs ainsi que la/les licences.
+        """
+        message = "CARDDB GUI v1.0"+"\n\nCopyright (C) 2026\nBernard Amouroux" \
+        "\nLicense : GPL Version 3, 29 June 2007\n" \
+        "\nMoteur du support de création des cartes"+"\nJan Amouroux" \
+        "\nMIT License (c) 2026 Jan Amouroux\n" \
+        "\nSur une Idée originale de Messieurs\n Doricam l'Argentin et LeCurieux\n"
+        self.MessageBox.textfont('Times 15 normal roman')
+        self.MessageBox.boxtitle('À propos')
+        self.MessageBox.message = message
+    
     def Quit(self):
         self.after(500, self.destroy)
         
         
-        
-
 if __name__ == "__main__":
     try:
         locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
