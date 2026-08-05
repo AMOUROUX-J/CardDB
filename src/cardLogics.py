@@ -4,7 +4,7 @@ def readRules(whichRule:str) -> list[str]:
     Va chercher les règles du dossier ./coreDataDB (permet d'éviter les erreurs de BD)
 
     Args:
-        whichRule (str): quel fichier rêgle lire
+        whichRule (str): quel fichier règle lire
 
     Returns:
         list[str]: la liste des catégories existantes

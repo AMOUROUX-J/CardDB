@@ -1,5 +1,6 @@
-from types import NoneType
 import unittest
+import Card
+import CombatData
 import cardLogics
 from equipmentCard import Equipment
 from CreatureCard import Creature
@@ -14,7 +15,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(eweCard.name,"ewe")
         self.assertEqual(eweCard.combatStat.hp ,15)
         self.assertEqual(eweCard.combatStat.atk ,10)
-        self.assertEqual(eweCard.combatStat.defence ,0)
+        self.assertEqual(eweCard.combatStat.defense ,0)
         self.assertEqual(eweCard.combatStat.heal ,3)
         self.assertEqual(eweCard.combatStat.target ,"mono")
         self.assertEqual(eweCard.currency ,"money")
@@ -30,7 +31,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(smallCard.name,"esprit de glace")
         self.assertEqual(smallCard.combatStat.hp ,5)
         self.assertEqual(smallCard.combatStat.atk ,2)
-        self.assertEqual(smallCard.combatStat.defence ,0)
+        self.assertEqual(smallCard.combatStat.defense ,0)
         self.assertEqual(smallCard.combatStat.heal ,0)
         self.assertEqual(smallCard.combatStat.target ,"mono")
         self.assertEqual(smallCard.currency ,"bleu")
@@ -46,7 +47,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(armeCard.name,"pique Longue")
         self.assertEqual(armeCard.combatStat.hp ,0)
         self.assertEqual(armeCard.combatStat.atk ,3)
-        self.assertEqual(armeCard.combatStat.defence ,1)
+        self.assertEqual(armeCard.combatStat.defense ,1)
         self.assertEqual(armeCard.combatStat.heal ,0)
         self.assertEqual(armeCard.combatStat.target ,None)
         self.assertEqual(armeCard.currency ,"money")
@@ -64,7 +65,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(armorCard.name,"casque de combat")
         self.assertEqual(armorCard.combatStat.hp ,5)
         self.assertEqual(armorCard.combatStat.atk ,0)
-        self.assertEqual(armorCard.combatStat.defence ,1)
+        self.assertEqual(armorCard.combatStat.defense ,1)
         self.assertEqual(armorCard.combatStat.heal ,0)
         self.assertEqual(armorCard.combatStat.target ,"mono")
         self.assertEqual(armorCard.currency ,"money")
@@ -80,7 +81,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(tankCard.name, "tank")
         self.assertEqual(tankCard.combatStat.hp, 30)
         self.assertEqual(tankCard.combatStat.atk, 15)
-        self.assertEqual(tankCard.combatStat.defence, 10)
+        self.assertEqual(tankCard.combatStat.defense, 10)
         self.assertEqual(tankCard.combatStat.heal, 0)
         self.assertEqual(tankCard.combatStat.target, None)
         self.assertEqual(tankCard.currency, "money")
@@ -103,7 +104,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(spellCard.name, "Assassinat")
         self.assertEqual(spellCard.combatStat.hp, 0)
         self.assertEqual(spellCard.combatStat.atk, 10)
-        self.assertEqual(spellCard.combatStat.defence, 0)
+        self.assertEqual(spellCard.combatStat.defense, 0)
         self.assertEqual(spellCard.combatStat.heal, 0)
         self.assertEqual(spellCard.combatStat.target, None)
         self.assertEqual(spellCard.currency, "bleu")
@@ -119,7 +120,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(spellCard.name, "Cortilège de protection")
         self.assertEqual(spellCard.combatStat.hp, 10)
         self.assertEqual(spellCard.combatStat.atk, 0)
-        self.assertEqual(spellCard.combatStat.defence, 3)
+        self.assertEqual(spellCard.combatStat.defense, 3)
         self.assertEqual(spellCard.combatStat.heal, 0)
         self.assertEqual(spellCard.combatStat.target, None)
         self.assertEqual(spellCard.currency, "bleu")
@@ -134,21 +135,34 @@ class TestCard(unittest.TestCase):
         armeCard = Equipment(itemType="arme",weaponType="lourd"  , elementType=[],name="pique Longue",cost=5,talent=["Tueur d'animaux"],currency="money",atk=3,defense=1)
         main.writeFile(armeCard, overwrite=True)
         armeCardRead = main.readFile(armeCard.name, armeCard.cardType)
-        self.assertEqual(armeCard.name,armeCardRead.name)
-        self.assertEqual(armeCard.combatStat.hp ,armeCardRead.combatStat.hp)
-        self.assertEqual(armeCard.combatStat.atk ,armeCardRead.combatStat.atk)
-        self.assertEqual(armeCard.combatStat.defence ,armeCardRead.combatStat.defence)
-        self.assertEqual(armeCard.combatStat.heal ,armeCardRead.combatStat.heal)
-        self.assertEqual(armeCard.combatStat.target ,armeCardRead.combatStat.target)
-        self.assertEqual(armeCard.currency ,armeCardRead.currency)
-        self.assertEqual(armeCard.cost ,armeCardRead.cost)
-        self.assertEqual(armeCard.talent ,armeCardRead.talent)
-        self.assertEqual(armeCard.race ,armeCardRead.race)
-        self.assertEqual(armeCard.cardType,armeCardRead.cardType)
-        self.assertEqual(armeCard.weaponType ,armeCardRead.weaponType)
-        self.assertEqual(armeCard.elementType ,armeCardRead.elementType)
-        self.assertEqual(armeCard.equipmentType, armeCardRead.equipmentType) # pyright: ignore[reportAttributeAccessIssue]
+        self.assertTrue(armeCard.__eq__(armeCardRead))
         #[print(f"\n\t{key:15}: {getattr(armeCardRead, key)}") for key in armeCardRead.__dict__.keys()]
-        
+    
+    def testWriteReadSpellCard(self) -> None:
+        spellCard = Spell(name="Cortilège de protection",cost=3,currency="bleu",typeSort="invocation",hp=10,defense=3,elementType=["feu"],race="artificiel",talent=["Muraille"])
+        main.writeFile(spellCard,True)
+        spellread = main.readFile("Cortilège de protection", "spell")
+        self.assertTrue(spellCard.__eq__(spellread))
+    
+    def test__eq__Card(self) -> None:
+        card1 = Card.Card("test1",2,"bleu",None,None)
+        card1bis = Card.Card("test1",5,"rouge",None,None)
+        self.assertFalse(card1.__eq__(card1bis))
+    
+    def test__eq__CombatData(self) -> None:
+        stat1 = CombatData.CombatData(hp=1,crit=2,atk=1,defense=1,heal=1,target=None)
+        stat1Bis = CombatData.CombatData(hp=1,crit=2,atk=1,defense=1,heal=1,target=None)
+        self.assertTrue(stat1.__eq__(stat1Bis))
+    
+    def test__eq__Creature(self) -> None:
+        creature1 = Creature(race="humanoide",elementType=["feu"],name="testTest",cost=1,currency="bleu",hp=1)
+        creature1bis = Creature(race="humanoide",elementType=["feu","eau"],name="testTest",cost=10,currency="bleu",hp=1)
+        self.assertFalse(creature1.__eq__(creature1bis))
+    
+    def test__eq__Equipement(self) -> None:
+        equipment1 = Equipment(weaponType="distance",itemType="distance",elementType=["eau"],name="testArme",cost=2,currency="rouge")
+        equipment1bis = Equipment(weaponType="distance",itemType="distance",elementType=["eau"],name="testArme",cost=2,currency="rouge")
+        self.assertTrue(equipment1.__eq__(equipment1bis))
+    
 if __name__ == "__main__":
     unittest.main(verbosity=2)

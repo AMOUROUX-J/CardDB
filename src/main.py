@@ -108,7 +108,7 @@ def readFile(name:str,cardType:str) -> Creature | Equipment | Spell:
 
     Args:
         name (str): nom de la carte
-        cardType (str): ty de carte
+        cardType (str): type de la carte
 
     Returns:
         Card: renvoie la carte
@@ -157,7 +157,7 @@ def writeFile(card:Equipment|Creature|Spell, overwrite: bool = False) -> str:
         "name": card.name,
         "hp": card.combatStat.hp,
         "atk": card.combatStat.atk,
-        "def": card.combatStat.defence,
+        "def": card.combatStat.defense,
         "heal": card.combatStat.heal,
         "costType": card.currency,
         "cost": card.cost,

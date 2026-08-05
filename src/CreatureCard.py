@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from Card import Card
 from CombatData import CombatData
+import CreatureCard
 import cardLogics
 
 @dataclass
@@ -18,7 +19,7 @@ class Creature(Card):
 
         Args:
             race (str): race de la carte
-            elementType (list[str]): liste des éléments
+            elementType (list[str]): liste des éléments (eau, feu, vent, ...)
             name (str): nom
             cost (int): coût
             currency (str): type de monnaie
@@ -29,12 +30,10 @@ class Creature(Card):
             heal (int, optional): valeur de soin. Defaults to 0.
             target (str, optional): type de ciblage. Defaults to "mono".
             weaponType (str, optional): type d'arme équipable. Defaults to None.
-            talent (_type_, optional): si à talent ses talents. Defaults to None.
+            talent (str, optional): si à talent ses talents. Defaults to None.
 
         Raises:
-            ValueError: si race absent des règles
-            ValueError: si arme absent des règles
-            ValueError: si elements absent des règles
+            ValueError: si race|arme|elements absent des règles
         """
         
         if race not in cardLogics.readRules("races"):
@@ -52,3 +51,22 @@ class Creature(Card):
         self.weaponType= weaponType
         self.cardType = "creature"
         self.race = race.lower()
+        
+    def __eq__(self, value: object) -> bool:
+        """__equals__
+
+        Args:
+            value (object): une autre Creature
+
+        Returns:
+            bool: true si les 2 cartes ont les mêmes valeurs sur toutes les variables
+        """
+        if not isinstance(value, Creature):
+            return False
+        outTrueFalse = []
+        outTrueFalse.append(super().__eq__(value))
+        outTrueFalse.append(self.combatStat == value.combatStat)
+        outTrueFalse.append(self.weaponType == value.weaponType)
+        outTrueFalse.append(self.race == value.race)
+
+        return not False in outTrueFalse
