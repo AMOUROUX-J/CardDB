@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from types import NoneType
 import cardLogics
 
 @dataclass
 class Card:
     
-    def __init__(self, name: str, cost: int, currency: str, talent: list[str]|str|None, elementType:list[str|None]) -> None:
+    def __init__(self, name: str, cost: int, currency: str, talent: list[str]|str|None, elementType:list[str|None]|str|None) -> None:
         """
         crée la carte
 
@@ -33,6 +34,29 @@ class Card:
             self.talent = [talent]
         else:
             self.talent = talent
-        self.elementType = list(elementType)
+        if not isinstance(elementType,list):
+            self.elementType = [].append(elementType)
+        else:
+            self.elementType = elementType
     
-    
+    def __eq__(self, value: object) -> bool:
+        """__equals__
+
+        Args:
+            value (object): une autre carte
+
+        Returns:
+            bool: true si les 2 cartes ont les mêmes valeurs sur toutes les variables
+        """
+        if not isinstance(value, Card):
+            return False
+        
+        outTrueFalse = []
+        outTrueFalse.append(self.name == value.name)
+        outTrueFalse.append(self.cost == value.cost)
+        outTrueFalse.append(self.talent == value.talent)
+        outTrueFalse.append(self.currency == value.currency)
+        outTrueFalse.append(self.elementType == value.elementType)
+        
+        return not False in outTrueFalse
+

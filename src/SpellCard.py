@@ -32,3 +32,23 @@ class Spell(Card):
         self.weaponType=weaponType
         self.typeSort = typeSort.lower()
         self.cardType = "spell"
+
+    def __eq__(self, value: object) -> bool:
+        """__equals__
+
+        Args:
+            value (object): une autre Creature
+
+        Returns:
+            bool: true si les 2 cartes ont les mêmes valeurs sur toutes les variables
+        """
+        if not isinstance(value, Spell):
+            return False
+        outTrueFalse = []
+        outTrueFalse.append(super().__eq__(value))
+        outTrueFalse.append(self.combatStat == value.combatStat)
+        outTrueFalse.append(self.weaponType == value.weaponType)
+        outTrueFalse.append(self.race == value.race)
+        outTrueFalse.append(self.typeSort == value.typeSort)
+
+        return not False in outTrueFalse
