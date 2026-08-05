@@ -219,7 +219,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self, className = "Tk", useTk = True)
 
         self.MessageBox = Win_MessageBox(self)  
-        self.state_bar = Window_StateBar(self,"",0,0,11,cspan=20,bg='tan',pady=3,txtfont=('Consolas 10 bold italic'))                                         
+        self.state_bar = Window_StateBar(self,"",0,0,10,cspan=20,bg='tan',pady=3,txtfont=('Consolas 10 bold italic'))                                         
         self.state_bar.message = " Info : Appuyez sur 'F1' pour la fenètre 'A propos'"
 
         self.ttlfont = Font(self, family='Courier',size=14,weight='bold',slant='italic')
@@ -234,7 +234,7 @@ class Application(tk.Tk):
         self.bind('<F1>', self.fenetre_a_propos)
         self.columnconfigure(list(range(20)), minsize=40, weight=1)
         self.rowconfigure(list(range(11)), minsize=32, weight=0)
-        self.minsize(width=800, height=410)
+        self.minsize(width=800, height=380)
         self.anchor('nw')
         
         self.init_variables()
@@ -416,7 +416,7 @@ class Application(tk.Tk):
                                              state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
         self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
         # ----------------- frame buttons save/default/cancel -----------------
-        buttonFrame = My_LabelFrame(self,col=0,row=10,cspan=20,pad=(2,0,0,3))
+        buttonFrame = My_LabelFrame(self,col=0,row=9,cspan=20,pad=(2,0,0,3))
         tk.Button(buttonFrame,text=" RàZ Défaut ",bg="#FDEED0",command=None,
                                 font=self.frmfont).grid(column=3,row=0,columnspan=2,sticky="ew")
         tk.Button(buttonFrame,bg="#C9FFD3",font=self.frmfont,command=self.save_CARDDB_card,
@@ -498,13 +498,15 @@ class Application(tk.Tk):
                 return False
             if not self.get_elements() and self.velementstype.get() == "None":
                 return False
-        return True    
+            return True
+        return False  
 
     def __valid_creature(self) -> bool:
         if self.__valid_CARDDB_card__():
             if self.vraces.get() == None:
                 return False
-        return True
+            return True
+        return False
     
     def __valid_equipement(self) -> bool:
         if self.__valid_CARDDB_card__():
@@ -513,8 +515,9 @@ class Application(tk.Tk):
             if not self.get_elements() and self.velementstype.get() == "None":
                 return False 
             if self.vracesequip == []:
-                return False        
-        return True
+                return False
+            return True        
+        return False
     
     def save_CARDDB_card(self):
         ok = False

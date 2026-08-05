@@ -1,20 +1,22 @@
 {
   "name": "Shelly",
-  "hp": 7,
+  "hp": 10,
   "atk": 0,
-  "def": 0,
+  "def": 10,
   "heal": 0,
   "costType": "money",
-  "cost": 2,
+  "cost": 1,
   "talent": [
+    "Sorcier",
     "Leader"
   ],
   "types": [
-    "special"
+    "special",
+    "magie"
   ],
-  "crit": 6,
+  "crit": 2,
   "race": "animal",
-  "weapon": "distance",
+  "weapon": "toutes",
   "targeting": "mono",
   "cardType": "creature"
 }
