@@ -385,28 +385,27 @@ class Application(tk.Tk):
         # ----------- frame des attributs spécifiques à Equipement ------------
         self.equipementFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,
                                                                   bg="#E9FAD8",name="!equipementFrame",sticky="sew")
-        tk.Label(self.equipementFrame,anchor="center",bg=self.equipementFrame.cget('bg'),text=" Mode de défense :",
+        tk.Label(self.equipementFrame,anchor="w",bg=self.equipementFrame.cget('bg'),text=" Mode de défense :",
                                                     font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="w")
         self.equipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
                                         font=self.itemfont,postcommand=None,values=self.itemtypelist,
                                              state="readonly",name="!equipementCombobox",textvariable=self.vitemtype)
         self.equipCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
         tk.Label(self.equipementFrame,text=" Type d'arme :",bg=self.equipementFrame.cget('bg'),
-                               font=self.itemfont).grid(row=0,column=6,columnspan=2,sticky="w")
+                               font=self.itemfont).grid(row=1,column=0,columnspan=2,sticky="w")
         self.armesEquipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
                                             font=self.itemfont,postcommand=None,values=list(self.armeslist),
                                                 state="readonly",name="!armesCombobox",textvariable=self.varmesequip)
-        self.armesEquipCombobox.grid(column=8,row=0,columnspan=4,pady=2,sticky="w")
+        self.armesEquipCombobox.grid(column=2,row=1,columnspan=4,pady=2,sticky="w")
         self.armesEquipCombobox.set(self.armeslist[2])
-        tk.Label(self.equipementFrame,text=" Races utilisants cette défense :",bg=self.equipementFrame.cget('bg'),
-                               font=self.itemfont).grid(row=1,column=0,columnspan=3,sticky="w")
+        tk.Label(self.equipementFrame,text=" Races équipées :",bg=self.equipementFrame.cget('bg'),
+                               font=self.itemfont).grid(row=0,column=6,columnspan=6,sticky="w")
         self.racesEquipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
                                         font=self.itemfont,postcommand=None,values=list(self.raceslist),
                                                 state="readonly",name="!racesCombobox",textvariable=self.vracesequip)
-        self.racesEquipCombobox.grid(column=3,row=1,columnspan=4,pady=2,sticky="w")
+        self.racesEquipCombobox.grid(column=12,row=0,columnspan=8,pady=2,sticky="w")
         tk.Button(self.equipementFrame,text="Ajouter à la liste des races",font=self.lblfont,
-                                        command=self.__add_race).grid(column=7,row=1,columnspan=13,padx=3,sticky="ew")
-        self.racesEquipCombobox.set("None")
+                                        command=self.__add_race).grid(column=6,row=1,columnspan=14,padx=3,sticky="ew")
         # -------------- frame des attributs spécifiques à Sort ---------------
         self.spellFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,bg="#D8E6FA",name="!spellFrame",sticky="sew")
         tk.Label(self.spellFrame,anchor="center",bg=self.spellFrame.cget('bg'),text=f"{' Type de sort :':>20}",
@@ -417,23 +416,35 @@ class Application(tk.Tk):
         self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
         # ----------------- frame buttons save/default/cancel -----------------
         buttonFrame = My_LabelFrame(self,col=0,row=9,cspan=20,pad=(2,0,0,3))
-        tk.Button(buttonFrame,text=" RàZ Défaut ",bg="#FDEED0",command=None,
-                                font=self.frmfont).grid(column=3,row=0,columnspan=2,sticky="ew")
+        tk.Button(buttonFrame,text=" RàZ Défaut ",bg="#FDEED0",command=self.__raz_default,
+                                            font=self.frmfont).grid(column=3,row=0,columnspan=2,sticky="ew")
         tk.Button(buttonFrame,bg="#C9FFD3",font=self.frmfont,command=self.save_CARDDB_card,
                                 text=" Enregistrer la carte ").grid(column=9,row=0,columnspan=2,sticky="ew")
         tk.Button(buttonFrame,text=" Annuler/Quitter ",command=self.Quit,bg="#FCC6C6",
-                                font=self.frmfont).grid(column=15,row=0,columnspan=2,sticky="ew")
+                                           font=self.frmfont).grid(column=15,row=0,columnspan=2,sticky="ew")
         # ---------------------------------------------------------------------
         self.framelist = set({self.equipementFrame,self.spellFrame})
         self.comboxCardType.event_generate("<<ComboboxSelected>>")
         self.state_bar.update_vltexte("",0)
         # ---------------------------------------------------------------------
+    
+    def __raz_default(self):
+        self.vtypetarget.set('mono') if self.vcardtype.get()=="creature" else self.vtypetarget.set('None')
+        self.velementstype.set('None'); self.vtalentstype.set('None')
+        self.varmes.set('None'); self.vracesequip.set('None')
+        self.__clear_multisetlist__()
+    
+    def __clear_multisetlist__(self):
+        """ RAZ des listes de self.multiSetlist """
+        [setlist.clear() for setlist in self.multiSetlist]
+        #[print(setlist) for setlist in self.multiSetlist] 
         
     def __add_talent(self, event:tk.Event=None):
         """ Méthode privée de création du set() des talents """
         if not self.vtalentstype.get() == 'None':
             self.multitalentlist.add(self.vtalentstype.get())
-            
+        #print(f"self.multitalentlist: {self.multitalentlist}")
+    
     def get_talents(self) -> list:
         """ Retourne la liste des 'talents' par conversion en list() """
         return list(self.multitalentlist)           
@@ -442,7 +453,8 @@ class Application(tk.Tk):
         """ Méthode privée de création du set() des éléments """
         if not self.velementstype.get() == 'None':
             self.multielementlist.add(self.velementstype.get())         
-        
+        #print(f"self.multielementlist: {self.multielementlist}")
+    
     def get_elements(self) -> list:
         """ Retourne la liste des 'elements' par conversion en list() """
         return list(self.multielementlist)                 
@@ -450,7 +462,9 @@ class Application(tk.Tk):
     def __add_race(self, event:tk.Event=None):
         """ Méthode privée de création du set() des races des équipements """
         self.multiracelist.add(self.vracesequip.get())
-            
+        self.multiracelist.discard('None')
+        #print(f"self.multiracelist: {self.multiracelist}")
+        
     def get_races(self) -> list:
         """ Retourne la liste des 'races équipables' par conversion en list() """
         return list(self.multiracelist)                 
@@ -496,7 +510,7 @@ class Application(tk.Tk):
         if self.__valid_CARDDB_card__():
             if self.varmes.get() == "None":
                 return False
-            if not self.get_elements() and self.velementstype.get() == "None":
+            if not self.get_elements() or self.velementstype.get() == "None":
                 return False
             return True
         return False  
@@ -512,9 +526,11 @@ class Application(tk.Tk):
         if self.__valid_CARDDB_card__():
             if self.varmesequip.get() == "None":
                 return False
-            if not self.get_elements() and self.velementstype.get() == "None":
+            if not self.get_elements() or self.velementstype.get() == "None":
                 return False 
-            if self.vracesequip == []:
+            if not self.multiracelist:
+                return False
+            if self.vtypetarget.get() == 'None':
                 return False
             return True        
         return False
@@ -525,22 +541,20 @@ class Application(tk.Tk):
             case 'creature':
                 if self.__valid_creature():
                     typecard, name = osp.basename(self.__save_creature()).split('_')
-                    self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
                     ok = True
             case 'equipement':
                 if self.__valid_equipement():
                     typecard, name = osp.basename(self.__save_equipement()).split('_')
-                    self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
                     ok = True
             case 'spell':
                 if self.__valid_spell():
                     typecard, name = osp.basename(self.__save_spell()).split('_')
-                    self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
                     ok = True
         if not ok:
             self.state_bar.update_vltexte(f" Info : Carte '{self.vcardtype.get()}' non crée, incompatibilité de données pour la carte demandée")
         else:  # - raz listes des talents, elements et races si sauvegarde ok -
-            [setlist.clear() for setlist in self.multiSetlist]
+            self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
+            self.__clear_multisetlist()
                         
     def __save_spell(self) -> str:
         # ------------------- création de l'objet 'Creature' ------------------
