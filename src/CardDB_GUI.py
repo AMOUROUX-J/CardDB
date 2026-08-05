@@ -38,6 +38,7 @@ import tkinter.ttk as ttk
 import os.path as osp
 
 from main import writeFile
+from SpellCard import Spell
 from equipmentCard import Equipment
 from CreatureCard import Creature
 from cardLogics import readRules
@@ -267,6 +268,8 @@ class Application(tk.Tk):
         self.vracesequip = tk.StringVar(value=["None",])
         self.multiracelist = set()
         # ---------------------------------------------------------------------
+        self.multiSetlist = [self.multiracelist, self.multitalentlist, self.multielementlist] 
+        # ---------------------------------------------------------------------
         self.vname = tk.StringVar()
         self.vlabelname = tk.StringVar(value=" Nom de la créature à créer :")
         self.vcost = tk.IntVar(value=1)
@@ -278,7 +281,6 @@ class Application(tk.Tk):
         self.vtypetarget = tk.StringVar(value=self.typetargetlist[0]) 
         self.vatk = tk.IntVar(value=0)
         self.vdef = tk.IntVar(value=0)
-        # ---------------------------------------------------------------------
     
     def cree_widgets(self):
         """ Création de tous les widgets de la fenètre principale
@@ -426,12 +428,12 @@ class Application(tk.Tk):
         self.comboxCardType.event_generate("<<ComboboxSelected>>")
         self.state_bar.update_vltexte("",0)
         # ---------------------------------------------------------------------
-    
+        
     def __add_talent(self, event:tk.Event=None):
         """ Méthode privée de création du set() des talents """
         if not self.vtalentstype.get() == 'None':
             self.multitalentlist.add(self.vtalentstype.get())
-        
+            
     def get_talents(self) -> list:
         """ Retourne la liste des 'talents' par conversion en list() """
         return list(self.multitalentlist)           
@@ -439,7 +441,7 @@ class Application(tk.Tk):
     def __add_element(self, event:tk.Event=None):
         """ Méthode privée de création du set() des éléments """
         if not self.velementstype.get() == 'None':
-            self.multielementlist.add(self.velementstype.get())
+            self.multielementlist.add(self.velementstype.get())         
         
     def get_elements(self) -> list:
         """ Retourne la liste des 'elements' par conversion en list() """
@@ -489,7 +491,15 @@ class Application(tk.Tk):
         if not self.vcost.get() > 0:
             return False
         return True
-        
+    
+    def __valid_spell(self) -> bool:
+        if self.__valid_CARDDB_card__():
+            if self.varmes.get() == "None":
+                return False
+            if not self.get_elements() and self.velementstype.get() == "None":
+                return False
+        return True    
+
     def __valid_creature(self) -> bool:
         if self.__valid_CARDDB_card__():
             if self.vraces.get() == None:
@@ -498,30 +508,57 @@ class Application(tk.Tk):
     
     def __valid_equipement(self) -> bool:
         if self.__valid_CARDDB_card__():
-            if not self.varmesequip.get():
+            if self.varmesequip.get() == "None":
                 return False
-            if self.velementstype.get() == "None":
+            if not self.get_elements() and self.velementstype.get() == "None":
                 return False 
             if self.vracesequip == []:
                 return False        
         return True
     
     def save_CARDDB_card(self):
+        ok = False
         match self.vcardtype.get():
             case 'creature':
-                typecard, name = osp.basename(self.__save_creature()).split('_')
-                if typecard == "creature":
-                    self.state_bar.update_vltexte(f" Info : Carte créature '{name}' sauvegardée avec succès")
+                if self.__valid_creature():
+                    typecard, name = osp.basename(self.__save_creature()).split('_')
+                    self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
+                    ok = True
             case 'equipement':
-                typecard, name = osp.basename(self.__save_equipement()).split('_')
-                if typecard == "equipement":
-                    self.state_bar.update_vltexte(f" Info : Carte créature '{name}' sauvegardée avec succès")
-
-    
+                if self.__valid_equipement():
+                    typecard, name = osp.basename(self.__save_equipement()).split('_')
+                    self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
+                    ok = True
+            case 'spell':
+                if self.__valid_spell():
+                    typecard, name = osp.basename(self.__save_spell()).split('_')
+                    self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
+                    ok = True
+        if not ok:
+            self.state_bar.update_vltexte(f" Info : Carte '{self.vcardtype.get()}' non crée, incompatibilité de données pour la carte demandée")
+        else:  # - raz listes des talents, elements et races si sauvegarde ok -
+            [setlist.clear() for setlist in self.multiSetlist]
+                        
+    def __save_spell(self) -> str:
+        # ------------------- création de l'objet 'Creature' ------------------
+        spell_card = Spell(name=self.vname.get(),
+                           cost=self.vcost.get(),
+                           currency=self.vcurencytype.get(),
+                           typeSort=self.vtypesort.get(),
+                           hp=self.vhp.get(),
+                           crit=self.vtypecrit.get(),
+                           atk=self.vatk.get(),
+                           defense=self.vdef.get(),
+                           heal=self.vheal.get(),
+                           target=self.vtypetarget.get(),
+                           race=self.vraces.get(),
+                           weaponType=self.varmes.get(),
+                           talent=self.get_talents(),
+                           elementType=self.get_elements()
+                           )
+        return writeFile(spell_card,overwrite=True)
+                    
     def __save_equipement(self) -> str:
-        if not self.__valid_equipement():
-            self.state_bar.update_vltexte(" Info : Carte 'Equipement' non crée, incompatibilité de données pour la carte demandée")
-            return False
         # ------------------- création de l'objet 'Creature' ------------------
         equipement_card = Equipment(weaponType=self.varmesequip.get(),
                                     elementType=self.get_elements(),
@@ -538,15 +575,9 @@ class Application(tk.Tk):
                                     talent=self.get_talents(),
                                     race=self.get_races()
                                     )
-        print(f"equipement_card: {equipement_card}")
-        dummy = writeFile(equipement_card,overwrite=True)
-        print(f"dummy: {dummy}")
-        return dummy
+        return writeFile(equipement_card,overwrite=True)
     
     def __save_creature(self) -> str:
-        if not self.__valid_creature():
-            self.state_bar.update_vltexte(" Info : Carte 'Créature' non crée, incompatibilité de données pour la carte demandée")
-            return False
         # ------------------- création de l'objet 'Creature' ------------------
         creature_card = Creature(race=self.vraces.get(),
                                  elementType=self.get_elements(),

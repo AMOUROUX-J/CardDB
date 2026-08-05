@@ -173,7 +173,7 @@ def writeFile(card:Equipment|Creature|Spell, overwrite: bool = False) -> str:
         payload["weaponType"]= card.weaponType
         payload["itemType"]=card.equipmentType # pyright: ignore[reportAttributeAccessIssue]
     
-    if card.cardType == "Spell":
+    if card.cardType == "spell":
         payload["typeSort"]=card.typeSort # pyright: ignore[reportAttributeAccessIssue]
 
     with open(file= pathToFile, mode="w", encoding='utf8') as outFile:

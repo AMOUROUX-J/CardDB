@@ -31,4 +31,4 @@ class Spell(Card):
         self.race = race
         self.weaponType=weaponType
         self.typeSort = typeSort.lower()
-        self.cardType = "Spell"
+        self.cardType = "spell"
