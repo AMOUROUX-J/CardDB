@@ -51,4 +51,4 @@ class Spell(Card):
         outTrueFalse.append(self.race == value.race)
         outTrueFalse.append(self.typeSort == value.typeSort)
 
-        return not False in outTrueFalse
+        return all(outTrueFalse)

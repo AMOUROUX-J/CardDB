@@ -1,8 +1,11 @@
+from os import name
 from pathlib import Path
 from SpellCard import Spell
 from equipmentCard import Equipment
 from CreatureCard import Creature
 import json
+
+from test_card import Terrain
 
 def getKeybordData() -> dict[str, str]:
     """
@@ -30,7 +33,7 @@ def getKeybordData() -> dict[str, str]:
     }
     return outData
 
-def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell:
+def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Terrain:
     """
     Génère un objet Card soit depuis un dico contenant un dico des donnés si aucun dico fourni, demande toutes les données via des input() (temp en attendant l'IG)
 
@@ -55,7 +58,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell:
                             atk=data["atk"],
                             defense=data["def"],
                             heal=data["heal"],
-                            currency=data["costType"],
+                            currency=data["currency"],
                             cost=data["cost"],
                             talent=data["talent"],
                             elementType=data["types"],
@@ -72,7 +75,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell:
                     atk=data["atk"],
                     defense=data["def"],
                     heal=data["heal"],
-                    currency=data["costType"],
+                    currency=data["currency"],
                     cost=data["cost"],
                     talent=data["talent"],
                     elementType=data["types"],
@@ -89,7 +92,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell:
                     atk=data["atk"],
                     defense=data["def"],
                     heal=data["heal"],
-                    currency=data["costType"],
+                    currency=data["currency"],
                     cost=data["cost"],
                     talent=data["talent"],
                     elementType=data["types"],
@@ -99,10 +102,17 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell:
                     target=data["targeting"],
                     typeSort=data["typeSort"]
                 )
+            case "terrain":
+                return Terrain(
+                    name=data["name"],
+                    cost=data["cost"],
+                    currency=data["currency"],
+                    effects=data["effects"]
+                )
             case _:
                 raise ValueError("type de carte non supporté")
 
-def readFile(name:str,cardType:str) -> Creature | Equipment | Spell:
+def readFile(name:str,cardType:str) -> Creature | Equipment | Spell | Terrain:
     """
     extrait les données d'une carte à partir des fichiers. chaque carte a son nom sous forme `{type de carte}_{nom carte}`
 
@@ -128,10 +138,13 @@ def readFile(name:str,cardType:str) -> Creature | Equipment | Spell:
         case "spell":
             return createCard("spell",data)
 
+        case "terrain":
+            return createCard("terrain",data)
+        
         case _:
             raise ValueError("type de carte inexistante")
 
-def writeFile(card:Equipment|Creature|Spell, overwrite: bool = False) -> str:
+def writeFile(card:Equipment|Creature|Spell|Terrain, overwrite: bool = False) -> str:
     """
     Enregistre la carte dans le dossier ./cardsData avec le nom sous format `{type de carte}_{nom carte}`
 
@@ -153,28 +166,39 @@ def writeFile(card:Equipment|Creature|Spell, overwrite: bool = False) -> str:
     if p.exists() and not overwrite:
         raise FileExistsError(f"File already exists: {pathToFile}. Pass overwrite=True to replace it.")
     
-    payload = {
-        "name": card.name,
-        "hp": card.combatStat.hp,
-        "atk": card.combatStat.atk,
-        "def": card.combatStat.defense,
-        "heal": card.combatStat.heal,
-        "costType": card.currency,
-        "cost": card.cost,
-        "talent": card.talent if len(card.talent) > 0 else [],
-        "types": card.elementType if len(card.elementType) > 0 else [],
-        "crit": card.combatStat.crit,
-        "race": getattr(card, "race", None),
-        "weapon": getattr(card, "weaponType", None),
-        "targeting": card.combatStat.target,
-        "cardType": card.cardType
-    }
-    if card.cardType == "equipement":
-        payload["weaponType"]= card.weaponType
-        payload["itemType"]=card.equipmentType # pyright: ignore[reportAttributeAccessIssue]
+    # les terrains son spéciaux et sont traité a-part
+    if isinstance(card,Terrain):
+        payload = {
+            "name": card.name,
+            "cost": card.cost,
+            "currency": card.currency,
+            "cardType": card.cardType,
+            "effects": card.effects
+        }
     
-    if card.cardType == "spell":
-        payload["typeSort"]=card.typeSort # pyright: ignore[reportAttributeAccessIssue]
+    else :
+        payload = {
+            "name": card.name,
+            "hp": card.combatStat.hp,
+            "atk": card.combatStat.atk,
+            "def": card.combatStat.defense,
+            "heal": card.combatStat.heal,
+            "currency": card.currency,
+            "cost": card.cost,
+            "talent": card.talent if len(card.talent) > 0 else [],
+            "types": card.elementType if card.elementType == None or len(card.elementType) > 0 else [],
+            "crit": card.combatStat.crit,
+            "race": getattr(card, "race", None),
+            "weapon": getattr(card, "weaponType", None),
+            "targeting": card.combatStat.target,
+            "cardType": card.cardType
+        }
+        if isinstance(card,Equipment):
+            payload["weaponType"]= card.weaponType
+            payload["itemType"]=card.equipmentType # pyright: ignore[reportAttributeAccessIssue]
+
+        if isinstance(card,Spell):
+            payload["typeSort"]=card.typeSort # pyright: ignore[reportAttributeAccessIssue]
 
     with open(file= pathToFile, mode="w", encoding='utf8') as outFile:
         json.dump(payload, outFile, ensure_ascii=False, indent=2)

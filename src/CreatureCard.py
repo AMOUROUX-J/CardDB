@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from Card import Card
 from CombatData import CombatData
-import CreatureCard
 import cardLogics
 
 @dataclass
@@ -69,4 +68,4 @@ class Creature(Card):
         outTrueFalse.append(self.weaponType == value.weaponType)
         outTrueFalse.append(self.race == value.race)
 
-        return not False in outTrueFalse
+        return all(outTrueFalse)

@@ -1,6 +1,7 @@
 import unittest
 import Card
 import CombatData
+from TerrainCard import Terrain
 import cardLogics
 from equipmentCard import Equipment
 from CreatureCard import Creature
@@ -152,20 +153,31 @@ class TestCard(unittest.TestCase):
     def test__eq__CombatData(self) -> None:
         stat1 = CombatData.CombatData(hp=1,crit=2,atk=1,defense=1,heal=1,target=None)
         stat1Bis = CombatData.CombatData(hp=1,crit=2,atk=1,defense=1,heal=1,target=None)
-        #self.assertTrue(stat1.__eq__(stat1Bis)) -> comme tu as défini la methode __eq__ de la classe, tu dois écrire :
         self.assertTrue(stat1 == stat1Bis)
     
     def test__eq__Creature(self) -> None:
         creature1 = Creature(race="humanoide",elementType=["feu"],name="testTest",cost=1,currency="bleu",hp=1)
         creature1bis = Creature(race="humanoide",elementType=["feu","eau"],name="testTest",cost=10,currency="bleu",hp=1)
-        #self.assertFalse(creature1.__eq__(creature1bis)) idem ici avec :
         self.assertFalse(creature1 == creature1bis)
     
     def test__eq__Equipement(self) -> None:
         equipment1 = Equipment(weaponType="distance",itemType="distance",elementType=["eau"],name="testArme",cost=2,currency="rouge")
         equipment1bis = Equipment(weaponType="distance",itemType="distance",elementType=["eau"],name="testArme",cost=2,currency="rouge")
-        #self.assertTrue(equipment1.__eq__(equipment1bis)) idem ici avec :
         self.assertTrue(equipment1 == equipment1bis)
+    
+    def testCreateTerrain(self) -> None:
+        terrain = Terrain("test0",10,"money",["sert de test","n'existe pas!!"])
+        self.assertEqual(terrain.name, "test0")
+        self.assertEqual(terrain.cost,10)
+        self.assertNotEqual(terrain.cost, 1)
+        self.assertEqual(terrain.currency, "money")
+        self.assertEqual(terrain.effects,["sert de test","n'existe pas!!"])
+    
+    def testWriteTerrain(self) -> None:
+        terrain = Terrain("test0",10,"money",["sert de test","n'existe pas!!"])
+        main.writeFile(terrain, True)
+        terrainBis = main.readFile("test0","terrain")
+        self.assertTrue(terrain == terrainBis)
     
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -58,7 +58,7 @@ class CombatData:
         outTrueFalse.append(self.heal == value.heal)
         outTrueFalse.append(self.target == value.target)
         
-        return not False in outTrueFalse
+        return all(outTrueFalse)
     
     def __str__(self) -> str:
         return f"hp: {self.hp}, crit: {self.crit}"

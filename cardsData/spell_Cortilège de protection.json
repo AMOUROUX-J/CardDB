@@ -4,7 +4,7 @@
   "atk": 0,
   "def": 3,
   "heal": 0,
-  "costType": "bleu",
+  "currency": "bleu",
   "cost": 3,
   "talent": [
     "Muraille"

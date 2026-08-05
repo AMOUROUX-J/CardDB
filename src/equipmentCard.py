@@ -76,4 +76,4 @@ class Equipment(Card):
         outTrueFalse.append(self.race == value.race)
         outTrueFalse.append(self.equipmentType == value.equipmentType)
 
-        return not False in outTrueFalse
+        return all(outTrueFalse)

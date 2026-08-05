@@ -4,7 +4,7 @@
   "atk": 3,
   "def": 1,
   "heal": 0,
-  "costType": "money",
+  "currency": "money",
   "cost": 5,
   "talent": [
     "Tueur d'animaux"
