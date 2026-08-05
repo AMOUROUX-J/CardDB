@@ -1,0 +1,11 @@
+{
+  "name": "destroy",
+  "cost": 3,
+  "currency": "money",
+  "cardType": "terrain",
+  "effects": [
+    "Quelques",
+    "effets",
+    "de terrain en"
+  ]
+}

@@ -39,6 +39,7 @@ import os.path as osp
 
 from main import writeFile
 from SpellCard import Spell
+from TerrainCard import Terrain
 from equipmentCard import Equipment
 from CreatureCard import Creature
 from cardLogics import readRules
@@ -524,15 +525,13 @@ class Application(tk.Tk):
     def __valid_CARDDB_card__(self) -> bool:
         if not self.vname.get() or len(self.vname.get()) < 2:
             return False
-        if not self.get_elements():
-            return False
         if not self.vcost.get() > 0:
             return False
         return True
     
     def __valid_terrain(self) -> bool:
         if self.__valid_CARDDB_card__():
-            if self.vterraineffet.get() == "None":
+            if not self.get_effets() or self.vterraineffet.get() == "None":
                 return False
             return True
         return False  
@@ -549,6 +548,8 @@ class Application(tk.Tk):
     def __valid_creature(self) -> bool:
         if self.__valid_CARDDB_card__():
             if self.vraces.get() == None:
+                return False
+            if not self.get_elements():
                 return False
             return True
         return False
@@ -592,7 +593,13 @@ class Application(tk.Tk):
             self.__clear_multisetlist()
     
     def __save_terrain(self) -> str:
-        return ("terrain","essai")
+        # ------------------- création de l'objet 'terrain' ------------------
+        terrain_card = Terrain(name=self.vname.get(),
+                               cost=self.vcost.get(),
+                               currency=self.vcurencytype.get(),
+                               effects=self.get_effets()
+                               )
+        return writeFile(terrain_card, overwrite=True)
                         
     def __save_spell(self) -> str:
         # ------------------- création de l'objet 'Creature' ------------------
