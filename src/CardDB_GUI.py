@@ -244,7 +244,7 @@ class Application(tk.Tk):
         """ Définition de toutes les variables de type tkinter.StringVar() ou tkinter.Inrvar()
             utilisées par l'application.
         """
-        self.cardtypelist:list = ["creature", "equipement", "spell"]
+        self.cardtypelist:list = ["creature", "equipement", "spell", "terrain"]
         self.vcardtype = tk.StringVar(value=self.cardtypelist[0])
         self.itemtypelist:list = ["arme","armure"]
         self.vitemtype = tk.StringVar(value=self.itemtypelist[0])
@@ -267,8 +267,11 @@ class Application(tk.Tk):
         self.vraces = tk.StringVar(value=self.raceslist[3])
         self.vracesequip = tk.StringVar(value=["None",])
         self.multiracelist = set()
+        self.typeffetlist = readRules('effets') 
+        self.vterraineffet = tk.StringVar(value=self.typeffetlist[-1])
+        self.multieffetlist = set()
         # ---------------------------------------------------------------------
-        self.multiSetlist = [self.multiracelist, self.multitalentlist, self.multielementlist] 
+        self.multiSetlist = [self.multiracelist, self.multitalentlist, self.multielementlist, self.multieffetlist] 
         # ---------------------------------------------------------------------
         self.vname = tk.StringVar()
         self.vlabelname = tk.StringVar(value=" Nom de la créature à créer :")
@@ -414,6 +417,16 @@ class Application(tk.Tk):
                                         font=self.itemfont,postcommand=None,values=self.typesortlist,
                                              state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
         self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
+        # ------------ frame des attributs spécifiques au terrain -------------
+        self.terrainFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,bg="#F3D6B6",name="!terrainFrame",sticky="sew")
+        tk.Label(self.terrainFrame,anchor="center",bg=self.terrainFrame.cget('bg'),text=f"{' Type d\'effet :':>20}",
+                                              font=self.itemfont).grid(row=0,column=0,columnspan=2,sticky="w")
+        self.terrainCombobox = ttk.Combobox(self.terrainFrame,background=self.terrainFrame.cget('bg'),
+                                        font=self.itemfont,postcommand=None,values=self.typeffetlist,
+                                             state="readonly",name="!terrainCombobox",textvariable=self.vterraineffet)
+        self.terrainCombobox.grid(column=2,row=0,columnspan=4,pady=2,sticky="w")
+        tk.Button(self.terrainFrame,text="Ajouter à la liste des effets",font=self.lblfont,
+                                        command=self.__add_effet).grid(column=6,row=0,columnspan=14,padx=3,sticky="ew")
         # ----------------- frame buttons save/default/cancel -----------------
         buttonFrame = My_LabelFrame(self,col=0,row=9,cspan=20,pad=(2,0,0,3))
         tk.Button(buttonFrame,text=" RàZ Défaut ",bg="#FDEED0",command=self.__raz_default,
@@ -423,15 +436,15 @@ class Application(tk.Tk):
         tk.Button(buttonFrame,text=" Annuler/Quitter ",command=self.Quit,bg="#FCC6C6",
                                            font=self.frmfont).grid(column=15,row=0,columnspan=2,sticky="ew")
         # ---------------------------------------------------------------------
-        self.framelist = set({self.equipementFrame,self.spellFrame})
+        self.framelist = set({self.equipementFrame,self.spellFrame,self.terrainFrame})
         self.comboxCardType.event_generate("<<ComboboxSelected>>")
         self.state_bar.update_vltexte("",0)
         # ---------------------------------------------------------------------
     
     def __raz_default(self):
         self.vtypetarget.set('mono') if self.vcardtype.get()=="creature" else self.vtypetarget.set('None')
-        self.velementstype.set('None'); self.vtalentstype.set('None')
-        self.varmes.set('None'); self.vracesequip.set('None')
+        self.velementstype.set('None'); self.vtalentstype.set('None'); self.varmes.set('None')
+        self.vracesequip.set('None'); self.vterraineffet.set('None')
         self.__clear_multisetlist__()
     
     def __clear_multisetlist__(self):
@@ -439,6 +452,14 @@ class Application(tk.Tk):
         [setlist.clear() for setlist in self.multiSetlist]
         #[print(setlist) for setlist in self.multiSetlist] 
         
+    def __add_effet(self, event:tk.Event=None):
+        if not self.vterraineffet.get() == 'None':
+            self.multieffetlist.add(self.vterraineffet.get())         
+        print(f"self.multieffetlist: {self.multieffetlist}")
+    
+    def get_effets(self) -> list:
+        return list(self.multieffetlist)    
+    
     def __add_talent(self, event:tk.Event=None):
         """ Méthode privée de création du set() des talents """
         if not self.vtalentstype.get() == 'None':
@@ -475,20 +496,23 @@ class Application(tk.Tk):
             du type de carte 'créature', 'evenement' ou 'spell'.
         """
         label_typecreature = self.framenom.nametowidget('!labelTypeCreature')
-        colordico:dict = {"equipement":"#E9FAD8","spell":"#D8E6FA"}
-        elidedico:dict = {"creature":" de la ","equipement":" de l'","spell":" de la carte "}
+        colordico:dict = {"equipement":"#E9FAD8","spell":"#D8E6FA","terrain":"#F3D6B6"}
+        elidedico:dict = {"creature":" de la ","equipement":" de l'","spell":" de la carte ","terrain":" du "}
         w = event.widget if event else self.comboxCardType
         if w.get() != "creature":
             label_typecreature.configure(state="disabled")
             self.comboxRaceType.configure(state="disabled")
             self.vtypetarget.set(self.typetargetlist[-1])
-            for remove_frame in set(filter(lambda lf: w.get() not in lf.name(), self.framelist)):
+            frame_to_remove = set(filter(lambda lf: w.get() not in lf.name(), self.framelist))
+            for remove_frame in frame_to_remove:
+                #print(f"specificFrame(remove_frame): {remove_frame}")
                 remove_frame.grid_remove() 
                 # -------------------------------------------------------------
-            for grid_frame in (self.framelist - set({remove_frame})):
-                label = f" Attribut spécifique au type de carte '{w.get()}'"
-                grid_frame.configure(bg=colordico[w.get()],text=label,font=self.frmfont)
-                grid_frame.grid()
+            grid_frame = list(self.framelist - frame_to_remove)[0]
+            #(f"specificFrame(grid_frame): {grid_frame}")
+            label = f" Attribut spécifique au type de carte '{w.get()}'"
+            grid_frame.configure(bg=colordico[w.get()],text=label,font=self.frmfont)
+            grid_frame.grid()
         else:
             label_typecreature.configure(state="normal")
             self.vtypetarget.set(self.typetargetlist[0])
@@ -506,6 +530,13 @@ class Application(tk.Tk):
             return False
         return True
     
+    def __valid_terrain(self) -> bool:
+        if self.__valid_CARDDB_card__():
+            if self.vterraineffet.get() == "None":
+                return False
+            return True
+        return False  
+        
     def __valid_spell(self) -> bool:
         if self.__valid_CARDDB_card__():
             if self.varmes.get() == "None":
@@ -550,11 +581,18 @@ class Application(tk.Tk):
                 if self.__valid_spell():
                     typecard, name = osp.basename(self.__save_spell()).split('_')
                     ok = True
+            case 'terrain':
+                if self.__valid_terrain():
+                    typecard, name = osp.basename(self.__save_terrain()).split('_')
+                    ok = True
         if not ok:
             self.state_bar.update_vltexte(f" Info : Carte '{self.vcardtype.get()}' non crée, incompatibilité de données pour la carte demandée")
         else:  # - raz listes des talents, elements et races si sauvegarde ok -
             self.state_bar.update_vltexte(f" Info : Carte {typecard} '{name}' sauvegardée avec succès")
             self.__clear_multisetlist()
+    
+    def __save_terrain(self) -> str:
+        return ("terrain","essai")
                         
     def __save_spell(self) -> str:
         # ------------------- création de l'objet 'Creature' ------------------
