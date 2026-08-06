@@ -173,7 +173,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(terrain.currency, "money")
         self.assertEqual(terrain.effects,["sert de test","n'existe pas!!"])
     
-    def testWriteTerrain(self) -> None:
+    def testWriteReadTerrain(self) -> None:
         terrain = Terrain("test0",10,"money",["sert de test","n'existe pas!!"])
         main.writeFile(terrain, True)
         terrainBis = main.readFile("test0","terrain")
