@@ -144,7 +144,7 @@ def readFile(name:str,cardType:str) -> Creature | Equipment | Spell | Terrain:
         case _:
             raise ValueError("type de carte inexistante")
 
-def writeFile(card:Equipment|Creature|Spell|Terrain, overwrite: bool = False) -> str:
+def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = False) -> str:
     """
     Enregistre la carte dans le dossier ./cardsData avec le nom sous format `{type de carte}_{nom carte}`
 
@@ -185,8 +185,8 @@ def writeFile(card:Equipment|Creature|Spell|Terrain, overwrite: bool = False) ->
             "heal": card.combatStat.heal,
             "currency": card.currency,
             "cost": card.cost,
-            "talent": card.talent if len(card.talent) > 0 else [],
-            "types": card.elementType if card.elementType == None or len(card.elementType) > 0 else [],
+            "talent": getattr(card, 'talent', None),
+            "types": getattr(card, "elementType", None),
             "crit": card.combatStat.crit,
             "race": getattr(card, "race", None),
             "weapon": getattr(card, "weaponType", None),

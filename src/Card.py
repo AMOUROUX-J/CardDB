@@ -4,7 +4,7 @@ import cardLogics
 @dataclass
 class Card:
     
-    def __init__(self, name: str, cost: int, currency: str, talent: list[str]|str|None, elementType:list[str|None]|str|None) -> None:
+    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None) -> None:
         """
         crée la carte
 
@@ -29,14 +29,8 @@ class Card:
         self.name = name
         self.cost = cost
         self.currency = currency
-        if not isinstance(talent,list):
-            self.talent = [talent]
-        else:
-            self.talent = talent
-        if not isinstance(elementType,list):
-            self.elementType = [].append(elementType)
-        else:
-            self.elementType = elementType
+        self.talent = talent
+        self.elementType = cardLogics.elementTest(elementType)
     
     def __eq__(self, value: object) -> bool:
         """__equals__

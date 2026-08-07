@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from types import NoneType
 from Card import Card
 from CombatData import CombatData
 import cardLogics
@@ -7,7 +8,7 @@ import cardLogics
 class Creature(Card):
     def __init__(self,
                 race:str, 
-                elementType:list[str],
+                elementType:tuple[str,...]|str|None,
                 name: str, 
                 cost: int, 
                 currency: str,
@@ -37,13 +38,10 @@ class Creature(Card):
         
         if race not in cardLogics.readRules("races"):
             raise ValueError("race innexistante")
-        
         if weaponType not in cardLogics.readRules("armes") and not weaponType == None:
             raise ValueError("type d'arme erreur")
         
-        for currentType in elementType:
-            if currentType not in cardLogics.readRules("elements"):
-                raise ValueError("element invalide")
+        self.elementType = cardLogics.elementTest(elementType)
         
         super().__init__(name, cost, currency, talent, elementType) # pyright: ignore[reportArgumentType]
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)

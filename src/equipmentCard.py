@@ -6,9 +6,9 @@ import cardLogics
 
 @dataclass
 class Equipment(Card):
-    def __init__(self, weaponType:str|None ,elementType:list[str], itemType:str,
+    def __init__(self, weaponType:str|None ,elementType:tuple[str,...]|str|None, itemType:str,
                 name: str, cost: int, currency: str,
-                hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None, talent: list[str]|None=None, race:list[str]=[]# pyright: ignore[reportArgumentType]
+                hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None, talent: str|None=None, race:list[str]=[]# pyright: ignore[reportArgumentType]
                 ) -> None:
         """
         crée l'équipement (armure ou arme)
@@ -45,9 +45,7 @@ class Equipment(Card):
             raise ValueError("type d'arme erreur")
         
         
-        for currentType in elementType:
-            if currentType not in cardLogics.readRules("elements") and not currentType == None:
-                raise ValueError("element invalide")
+        self.elementType = cardLogics.elementTest(elementType)
 
         super().__init__(name, cost, currency, talent, elementType) # pyright: ignore[reportArgumentType]
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)
