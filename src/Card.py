@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 import cardLogics
+import shutil
 
 @dataclass
 class Card:
     
-    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None) -> None:
+    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, cardImg:str="imgsDataDB/cardImages/placeHolder.jpg") -> None:
         """
         crée la carte
 
@@ -20,7 +21,7 @@ class Card:
             ValueError: si la carte coute moins que 0
         """
         
-        if "New name" in name or len(name) <4 :
+        if not name or len(name) <4 :
             raise ValueError("le nom d'une carte 'CardDB' doit être renseigné avec au moins 4 caractères")
         
         if currency not in cardLogics.readRules("monnaie"):
@@ -29,6 +30,9 @@ class Card:
         if cost <0 :
             raise ValueError("le prix doit être supérieur à 0")
         
+        # chemin ou les cartes vont être copiées
+        outPath = f"imgsDataDB/cardImages/{name}"
+        # 
         self.name = name
         self.cost = cost
         self.currency = currency
