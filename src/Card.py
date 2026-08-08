@@ -20,6 +20,9 @@ class Card:
             ValueError: si la carte coute moins que 0
         """
         
+        if "New name" in name or len(name) <4 :
+            raise ValueError("le nom d'une carte 'CardDB' doit être renseigné avec au moins 4 caractères")
+        
         if currency not in cardLogics.readRules("monnaie"):
             raise ValueError("type de monnaie inexistante")
         
