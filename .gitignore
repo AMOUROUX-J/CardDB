@@ -427,6 +427,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# custom made by us
 cardDB.code-workspace
-Talents/talents.txt
-cardsData/*
+**/cardsData/
