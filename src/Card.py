@@ -31,8 +31,10 @@ class Card:
             raise ValueError("le prix doit être supérieur à 0")
         
         # chemin ou les cartes vont être copiées
-        outPath = f"imgsDataDB/cardImages/{name}"
-        # 
+        self.outPath = f"imgsDataDB/cardImages/{name}"
+        # nom du fichier Image de la carte
+        self.imageFilename:str = ""
+         
         self.name = name
         self.cost = cost
         self.currency = currency
