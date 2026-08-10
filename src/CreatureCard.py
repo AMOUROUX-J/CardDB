@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from types import NoneType
 from Card import Card
 from CombatData import CombatData
 import cardLogics
@@ -7,11 +6,9 @@ import cardLogics
 @dataclass
 class Creature(Card):
     def __init__(self,
-                race:str, 
+                race:str, name: str, cardImg:str,
                 elementType:tuple[str,...]|str|None,
-                name: str, 
-                cost: int, 
-                currency: str,
+                cost: int, currency: str,
                 hp:int, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str="mono",weaponType:str=None, talent: str=None # pyright: ignore[reportArgumentType]
                 ) -> None:
         """
@@ -43,7 +40,9 @@ class Creature(Card):
         
         self.elementType = cardLogics.elementTest(elementType)
         
-        super().__init__(name, cost, currency, talent, elementType) # pyright: ignore[reportArgumentType]
+        super().__init__(name=name, cost=cost, 
+                        currency=currency, talent=talent, 
+                        elementType=elementType, cardImg=cardImg)
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)
         self.weaponType= weaponType
         self.cardType = "creature"

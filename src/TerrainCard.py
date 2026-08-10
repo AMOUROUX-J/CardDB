@@ -3,7 +3,7 @@ from Card import Card
 
 
 class Terrain(Card):
-    def __init__(self, name: str, cost: int, currency: str, effects: list[str]|str) -> None:
+    def __init__(self, name: str, cost: int, currency: str, effects: list[str]|str, cardImg:str) -> None:
         """crée un terrain
 
         Args:
@@ -12,11 +12,14 @@ class Terrain(Card):
             currency (str): type de coût
             effects (list[str] | str): liste des effects du terrain sur la partie
         """
-        super().__init__(name, cost, currency, talent=None, elementType= None)
         if not isinstance(effects,list):
             effects = [effects,]
-        self.cardType = "terrain"
+        self.name = name
+        self.cost = cost
+        self.currency = currency
         self.effects = effects
+        self.cardType = "terrain"
+        self.cardType = cardImg
     
     def __eq__(self, value: object) -> bool:
         """__equals__

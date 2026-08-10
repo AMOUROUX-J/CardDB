@@ -5,7 +5,7 @@ import cardLogics
 
 
 class Spell(Card):
-    def __init__(self, name: str, cost: int, currency: str,
+    def __init__(self, name: str, cost: int, currency: str, cardImg:str,
                 typeSort:str,
                 hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None,
                 race:str|None=None, weaponType:str|None=None,
@@ -22,7 +22,9 @@ class Spell(Card):
         
         self.elementType = cardLogics.elementTest(elementType)
             
-        super().__init__(name, cost, currency, talent, elementType)
+        super().__init__(name=name, cost=cost, 
+                        currency=currency, talent=talent, 
+                        elementType=elementType, cardImg=cardImg)
 
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)
         if isinstance(race,str) : race.lower()

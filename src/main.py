@@ -5,6 +5,7 @@ from equipmentCard import Equipment
 from CreatureCard import Creature
 from Card import Card
 import json
+import shutil
 
 from test_card import Terrain
 
@@ -66,7 +67,8 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                             crit=data["crit"],
                             race=data["race"],
                             weaponType=data["weapon"],
-                            target=data["targeting"]
+                            target=data["targeting"],
+                            cardImg=data["outPath"]
                             )
                 
             case "equipement":
@@ -84,7 +86,8 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                     race=data["race"],
                     target=data["targeting"],
                     weaponType=data["weapon"],
-                    itemType=data["itemType"]
+                    itemType=data["itemType"],
+                    cardImg=data["outPath"]
             )
             case "spell":
                 return Spell(
@@ -101,14 +104,16 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                     race=data["race"],
                     weaponType=data["weapon"],
                     target=data["targeting"],
-                    typeSort=data["typeSort"]
+                    typeSort=data["typeSort"],
+                    cardImg=data["outPath"]
                 )
             case "terrain":
                 return Terrain(
                     name=data["name"],
                     cost=data["cost"],
                     currency=data["currency"],
-                    effects=data["effects"]
+                    effects=data["effects"],
+                    cardImg=data["outPath"]
                 )
             case _:
                 raise ValueError("type de carte non supporté")
@@ -175,7 +180,8 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
             "cost": card.cost,
             "currency": card.currency,
             "cardType": card.cardType,
-            "effects": card.effects
+            "effects": card.effects,
+            "imageFile": card.ImageOutPath
         }
     
     else :
@@ -193,8 +199,8 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
             "race": getattr(card, "race", None),
             "weapon": getattr(card, "weaponType", None),
             "targeting": card.combatStat.target,
-            "imagefile": getattr(card, "imageFilename", "default.png"),
-            "cardType": card.cardType
+            "cardType": card.cardType,
+            "imageFile": card.imageFilename
         }
         if isinstance(card,Equipment):
             payload["weaponType"]= card.weaponType
@@ -205,5 +211,6 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
 
     with open(file= pathToFile, mode="w", encoding='utf8') as outFile:
         json.dump(payload, outFile, ensure_ascii=False, indent=2)
+    shutil.copyfile(path.abspath(f"{payload['imagefile']}"),path.abspath(card.outPath))
 
     return pathToFile

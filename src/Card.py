@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import cardLogics
-import shutil
 
 @dataclass
 class Card:
@@ -8,7 +7,7 @@ class Card:
     CardDBOutPath:str = "./cardsData"
     ImageOutPath:str = "./imgsDataDB/cardImages"
     
-    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, cardImg:str="imgsDataDB/cardImages/placeHolder.jpg") -> None:
+    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, cardImg:str=f"{ImageOutPath}/placeholder.png") -> None:
         """
         crée la carte
 
@@ -34,10 +33,10 @@ class Card:
             raise ValueError("le prix doit être supérieur à 0")
         
         # chemin ou les cartes vont être copiées
-        self.outPath = f"imgsDataDB/cardImages/{name}"
+        self.outPath = f"{Card.ImageOutPath}/{name}"
         # nom du fichier Image de la carte
-        self.imageFilename:str = "default.png"
-         
+        self.imageFilename = cardImg
+        
         self.name = name
         self.cost = cost
         self.currency = currency
