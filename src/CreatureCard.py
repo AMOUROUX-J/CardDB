@@ -6,10 +6,10 @@ import cardLogics
 @dataclass
 class Creature(Card):
     def __init__(self,
-                race:str, name: str, cardImg:str,
+                race:str, name: str,
                 elementType:tuple[str,...]|str|None,
                 cost: int, currency: str,
-                hp:int, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str="mono",weaponType:str=None, talent: str=None, effects:list[str|None]|str|None = None # pyright: ignore[reportArgumentType]
+                hp:int, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str="mono",weaponType:str|None=None, talent: str|None=None, effects:list[str|None]|str|None = None , cardImg:str=f"{Card.ImageOutPath}/placeholder.png"
                 ) -> None:
         """
         crée la créature

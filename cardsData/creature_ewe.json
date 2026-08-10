@@ -4,10 +4,13 @@
   "atk": 10,
   "def": 0,
   "heal": 3,
-  "costType": "money",
+  "currency": "money",
   "cost": 5,
-  "talent": [
-    "increvable"
+  "talent": "increvable",
+  "effects": [
+    "vole vos sous",
+    "Seconde chance",
+    "créatrice de frac"
   ],
   "types": [
     "special"
@@ -16,5 +19,6 @@
   "race": "magique",
   "weapon": "lourd",
   "targeting": "mono",
-  "cardType": "creature"
+  "cardType": "creature",
+  "imageFile": "./imgsDataDB/cardImages/placeholder.png"
 }

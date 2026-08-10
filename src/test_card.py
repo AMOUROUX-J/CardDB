@@ -26,10 +26,12 @@ class TestCard(unittest.TestCase):
         self.assertEqual(eweCard.weaponType ,"lourd")
         self.assertEqual(eweCard.elementType ,("special",))
         self.assertEqual(eweCard.cardType, "creature")
+        self.assertEqual(eweCard.effects, [None])
+
 
     def testCreatureMinInfo(self) -> None:
         smallCard = Creature(race="magique",elementType=("eau","special"),name="esprit de glace",cost=1,currency="bleu",atk=2,hp=5,crit=20)
-        self.assertEqual(smallCard.name,"esprit de glace")
+        self.assertEqual(smallCard.name,"esprit_de_glace")
         self.assertEqual(smallCard.combatStat.hp ,5)
         self.assertEqual(smallCard.combatStat.atk ,2)
         self.assertEqual(smallCard.combatStat.defense ,0)
@@ -42,10 +44,12 @@ class TestCard(unittest.TestCase):
         self.assertEqual(smallCard.weaponType ,None)
         self.assertEqual(smallCard.elementType ,("eau","special"))
         self.assertEqual(smallCard.cardType, "creature")
+        self.assertEqual(smallCard.effects, [None])
+
 
     def testWeaponCardCreate(self) -> None:
         armeCard = Equipment(itemType="arme",weaponType="lourd"  , elementType=(),name="pique Longue",cost=5,talent="Tueur d'animaux",currency="money",atk=3,defense=1) # pyright: ignore[reportArgumentType]
-        self.assertEqual(armeCard.name,"pique Longue")
+        self.assertEqual(armeCard.name,"pique_Longue")
         self.assertEqual(armeCard.combatStat.hp ,0)
         self.assertEqual(armeCard.combatStat.atk ,3)
         self.assertEqual(armeCard.combatStat.defense ,1)
@@ -63,7 +67,7 @@ class TestCard(unittest.TestCase):
         armorCard = Equipment(weaponType=None, itemType="armure", elementType=None, name="casque de combat", 
                         cost=3, currency="money", hp = 5, defense = 1, crit = 0, atk = 0, heal = 0,
                         target="mono",race=["magique","vegetal","artificiel","humanoide","animal"])
-        self.assertEqual(armorCard.name,"casque de combat")
+        self.assertEqual(armorCard.name,"casque_de_combat")
         self.assertEqual(armorCard.combatStat.hp ,5)
         self.assertEqual(armorCard.combatStat.atk ,0)
         self.assertEqual(armorCard.combatStat.defense ,1)
@@ -76,6 +80,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(armorCard.weaponType ,None)
         self.assertEqual(armorCard.elementType ,None)
         self.assertEqual(armorCard.equipmentType, "armure")
+        self.assertEqual(armorCard.effects, [None])
     
     def testTankCardCreate(self) -> None: 
         tankCard = Equipment(elementType="acier", weaponType=None, itemType="armure", name="tank", cost=50, currency="money", hp=30, atk=15, defense=10, talent="Absobtion", race=["humanoide"])
@@ -92,6 +97,8 @@ class TestCard(unittest.TestCase):
         self.assertEqual(tankCard.weaponType, None)
         self.assertEqual(tankCard.elementType, ("acier",))
         self.assertEqual(tankCard.equipmentType, "armure")
+        self.assertEqual(tankCard.effects, [None])
+
 
     def testreadRules(self) -> None:
         rulesList = cardLogics.readRules("testrule")
@@ -117,8 +124,8 @@ class TestCard(unittest.TestCase):
         self.assertEqual(spellCard.typeSort, "actif")
         
     def testSpell2(self) -> None:
-        spellCard = Spell(name="Cortilège de protection",cost=3,currency="bleu",typeSort="invocation",hp=10,defense=3,elementType="feu",race="artificiel",talent="Muraille")
-        self.assertEqual(spellCard.name, "Cortilège de protection")
+        spellCard = Spell(name="Cortilège de protection",cost=3,currency="bleu",typeSort="invocation",hp=10,defense=3,elementType="feu",race="artificiel",talent="Muraille", effects=["mange vos Ewes", "pile ou face"])
+        self.assertEqual(spellCard.name, "Cortilège_de_protection")
         self.assertEqual(spellCard.combatStat.hp, 10)
         self.assertEqual(spellCard.combatStat.atk, 0)
         self.assertEqual(spellCard.combatStat.defense, 3)
@@ -131,6 +138,14 @@ class TestCard(unittest.TestCase):
         self.assertEqual(spellCard.weaponType, None)
         self.assertEqual(spellCard.elementType, ("feu",))
         self.assertEqual(spellCard.typeSort, "invocation")
+        self.assertEqual(spellCard.effects, ["mange vos Ewes", "pile ou face"])
+        
+    
+    def testWriteReadEwe(self):
+        eweCard = Creature(race="magique",weaponType="lourd",elementType="special",name="ewe",cost=5,talent="increvable",currency="money",hp=15,crit=8,atk=10,defense=0,heal=3,target="mono", effects=["vole vos sous", "Seconde chance", "créatrice de frac"])
+        main.writeFile(eweCard, True)
+        eweCopy = main.readFile("ewe","creature")
+        self.assertEqual(eweCard,eweCopy)
 
     def testWriteReadCard(self) -> None:
         armeCard = Equipment(itemType="arme",weaponType="lourd", elementType=(),name="pique Longue",cost=5,talent="Tueur d'animaux",currency="money",atk=3,defense=1)
@@ -142,7 +157,7 @@ class TestCard(unittest.TestCase):
     def testWriteReadSpellCard(self) -> None:
         spellCard = Spell(name="Cortilège de protection",cost=3,currency="bleu",typeSort="invocation",hp=10,defense=3,elementType="feu",race="artificiel",talent="Muraille")
         main.writeFile(spellCard,True)
-        spellread = main.readFile("Cortilège de protection", "spell")
+        spellread = main.readFile("Cortilège_de_protection", "spell")
         self.assertTrue(spellCard.__eq__(spellread))
     
     def test__eq__Card(self) -> None:

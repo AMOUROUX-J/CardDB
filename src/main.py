@@ -69,7 +69,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                             race=data["race"],
                             weaponType=data["weapon"],
                             target=data["targeting"],
-                            cardImg=data["outPath"]
+                            cardImg=data["imageFile"]
                             )
                 
             case "equipement":
@@ -89,7 +89,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                     target=data["targeting"],
                     weaponType=data["weapon"],
                     itemType=data["itemType"],
-                    cardImg=data["outPath"]
+                    cardImg=data["imageFile"]
             )
             case "spell":
                 return Spell(
@@ -108,7 +108,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                     weaponType=data["weapon"],
                     target=data["targeting"],
                     typeSort=data["typeSort"],
-                    cardImg=data["outPath"]
+                    cardImg=data["imageFile"]
                 )
             case "terrain":
                 return Terrain(
@@ -116,7 +116,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                     cost=data["cost"],
                     currency=data["currency"],
                     effects=data["effects"],
-                    cardImg=data["outPath"]
+                    cardImg=data["imageFile"]
                 )
             case _:
                 raise ValueError("type de carte non supporté")
@@ -171,9 +171,8 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
     name = card.name
     cardType = card.cardType
 
-    pathToFile = f"./cardsData/{cardType}_{name}.json"
-    p = Path(pathToFile)
-    if p.exists() and not overwrite:
+    pathToFile = Path(f"./cardsData/{cardType}_{name}.json")
+    if pathToFile.exists() and not overwrite:
         raise FileExistsError(f"File already exists: {pathToFile}. Pass overwrite=True to replace it.")
     
     # les terrains son spéciaux et sont traité a-part
@@ -184,7 +183,7 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
             "currency": card.currency,
             "cardType": card.cardType,
             "effects": card.effects,
-            "imageFile": card.ImageOutPath
+            "imageFile": card.imageFilename
         }
     
     else :
@@ -215,6 +214,7 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
 
     with open(file= pathToFile, mode="w", encoding='utf8') as outFile:
         json.dump(payload, outFile, ensure_ascii=False, indent=2)
-    shutil.copyfile(path.abspath(f"{payload['imagefile']}"),path.abspath(card.outPath))
+        
+    shutil.copyfile(f"{payload['imageFile']}",card.outPath)
 
-    return pathToFile
+    return str(pathToFile)

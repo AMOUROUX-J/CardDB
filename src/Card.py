@@ -7,7 +7,7 @@ class Card:
     CardDBOutPath:str = "./cardsData"
     ImageOutPath:str = "./imgsDataDB/cardImages"
     
-    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, effects:list[str|None]|str|None, cardImg:str=f"{ImageOutPath}/placeholder.png") -> None:
+    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, effects:list[str|None]|str|None=None, cardImg:str=f"{ImageOutPath}/placeholder.png") -> None:
         """
         crée la carte
 
@@ -23,8 +23,8 @@ class Card:
             ValueError: si la carte coute moins que 0
         """
         
-        if not name or len(name) <4 :
-            raise ValueError("le nom d'une carte 'CardDB' doit être renseigné avec au moins 4 caractères")
+        if not name :
+            raise ValueError("le nom d'une carte 'CardDB' doit être renseigné avec au moins 1 caractères")
         
         if currency not in cardLogics.readRules("monnaie"):
             raise ValueError("type de monnaie inexistante")
@@ -36,11 +36,11 @@ class Card:
             effects = [effects,]
         
         # chemin ou les cartes vont être copiées
-        self.outPath = f"{Card.ImageOutPath}/{name}"
+        self.outPath = f"{Card.ImageOutPath}/{name}.png".replace(" ","_")
         # nom du fichier Image de la carte
         self.imageFilename = cardImg
         
-        self.name = name
+        self.name = name.replace(" ","_")
         self.cost = cost
         self.currency = currency
         self.talent = talent

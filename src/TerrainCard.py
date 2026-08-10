@@ -3,7 +3,7 @@ from Card import Card
 
 
 class Terrain(Card):
-    def __init__(self, name: str, cost: int, currency: str, effects: list[str]|str, cardImg:str) -> None:
+    def __init__(self, name: str, cost: int, currency: str, effects: list[str]|str, cardImg:str=f"{Card.ImageOutPath}/placeholder.png") -> None:
         """crée un terrain
 
         Args:
@@ -19,8 +19,12 @@ class Terrain(Card):
         self.currency = currency
         self.effects = effects
         self.cardType = "terrain"
-        self.cardType = cardImg
-    
+        # chemin ou les cartes vont êt
+        # re copiées
+        self.outPath = f"{Card.ImageOutPath}/{name}"
+        # nom du fichier Image de la carte
+        self.imageFilename = cardImg    
+        
     def __eq__(self, value: object) -> bool:
         """__equals__
 
