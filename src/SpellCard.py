@@ -9,7 +9,7 @@ class Spell(Card):
                 typeSort:str,
                 hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None,
                 race:str|None=None, weaponType:str|None=None,
-                talent: str | None = None, elementType: tuple[str,...] | str |None = None) -> None:
+                talent: str | None = None, effects:list[str|None]|str|None=None, elementType: tuple[str,...] | str |None = None) -> None:
         
         if typeSort.lower() not in cardLogics.readRules("sort"):
             raise ValueError("type de sort innexistant")
@@ -23,7 +23,7 @@ class Spell(Card):
         self.elementType = cardLogics.elementTest(elementType)
             
         super().__init__(name=name, cost=cost, 
-                        currency=currency, talent=talent, 
+                        currency=currency, talent=talent, effects=effects,
                         elementType=elementType, cardImg=cardImg)
 
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)

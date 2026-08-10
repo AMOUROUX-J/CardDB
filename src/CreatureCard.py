@@ -9,7 +9,7 @@ class Creature(Card):
                 race:str, name: str, cardImg:str,
                 elementType:tuple[str,...]|str|None,
                 cost: int, currency: str,
-                hp:int, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str="mono",weaponType:str=None, talent: str=None # pyright: ignore[reportArgumentType]
+                hp:int, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str="mono",weaponType:str=None, talent: str=None, effects:list[str|None]|str|None = None # pyright: ignore[reportArgumentType]
                 ) -> None:
         """
         crée la créature
@@ -41,7 +41,7 @@ class Creature(Card):
         self.elementType = cardLogics.elementTest(elementType)
         
         super().__init__(name=name, cost=cost, 
-                        currency=currency, talent=talent, 
+                        currency=currency, talent=talent, effects=effects, 
                         elementType=elementType, cardImg=cardImg)
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)
         self.weaponType= weaponType

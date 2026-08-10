@@ -8,7 +8,8 @@ import cardLogics
 class Equipment(Card):
     def __init__(self, weaponType:str|None ,elementType:tuple[str,...]|str|None, itemType:str,
                 name: str, cost: int, currency: str, cardImg:str,
-                hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None, talent: str|None=None, race:list[str]=[]# pyright: ignore[reportArgumentType]
+                hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None, talent: str|None=None, effects:list[str|None]|str|None=None,
+                race:list[str]=[]
                 ) -> None:
         """
         crée l'équipement (armure ou arme)
@@ -48,7 +49,7 @@ class Equipment(Card):
         self.elementType = cardLogics.elementTest(elementType)
 
         super().__init__(name=name, cost=cost, 
-                        currency=currency, talent=talent, 
+                        currency=currency, talent=talent, effects=effects,
                         elementType=elementType, cardImg=cardImg)
         self.combatStat = CombatData(hp, crit, atk, defense, heal, target)
         self.cardType = "equipement"

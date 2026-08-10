@@ -7,7 +7,7 @@ class Card:
     CardDBOutPath:str = "./cardsData"
     ImageOutPath:str = "./imgsDataDB/cardImages"
     
-    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, cardImg:str=f"{ImageOutPath}/placeholder.png") -> None:
+    def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, effects:list[str|None]|str|None, cardImg:str=f"{ImageOutPath}/placeholder.png") -> None:
         """
         crée la carte
 
@@ -32,6 +32,9 @@ class Card:
         if cost <0 :
             raise ValueError("le prix doit être supérieur à 0")
         
+        if not isinstance(effects, list): 
+            effects = [effects,]
+        
         # chemin ou les cartes vont être copiées
         self.outPath = f"{Card.ImageOutPath}/{name}"
         # nom du fichier Image de la carte
@@ -41,6 +44,7 @@ class Card:
         self.cost = cost
         self.currency = currency
         self.talent = talent
+        self.effects = effects
         self.elementType = cardLogics.elementTest(elementType)
         
     def __str__(self) -> str:
