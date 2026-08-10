@@ -134,7 +134,7 @@ def readFile(name:str,cardType:str) -> Creature | Equipment | Spell | Terrain:
     """
     
     #pathToFile = f"./cardsData/{cardType}_{name}.json"
-    pathToFile = path.join('./',Card.CardDBOutPath,f"{cardType}_{name}.json")
+    pathToFile = Path(path.join("./",Card.CardDBOutPath,f"{cardType}_{name}.json"))
     with open(file=pathToFile,encoding='utf8',mode='r') as inFile:
         data = json.load(inFile)
     
@@ -171,7 +171,8 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
     name = card.name
     cardType = card.cardType
 
-    pathToFile = Path(f"./cardsData/{cardType}_{name}.json")
+    #pathToFile = Path(f"./cardsData/{cardType}_{name}.json")
+    pathToFile = Path(path.join("./",Card.CardDBOutPath,f"{cardType}_{name}.json"))
     if pathToFile.exists() and not overwrite:
         raise FileExistsError(f"File already exists: {pathToFile}. Pass overwrite=True to replace it.")
     

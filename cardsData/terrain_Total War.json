@@ -1,0 +1,11 @@
+{
+  "name": "Total War",
+  "cost": 10,
+  "currency": "money",
+  "cardType": "terrain",
+  "effects": [
+    "Seconde chance",
+    "créatrice de frac"
+  ],
+  "imageFile": "././imgsDataDB/cardImages\\total_war.png"
+}

@@ -430,5 +430,5 @@ FodyWeavers.xsd
 
 # custom made by us
 cardDB.code-workspace
-/cardsData/
+#/cardsData/
 imgsDataDB/cardImages/

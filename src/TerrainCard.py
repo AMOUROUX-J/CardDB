@@ -19,8 +19,7 @@ class Terrain(Card):
         self.currency = currency
         self.effects = effects
         self.cardType = "terrain"
-        # chemin ou les cartes vont êt
-        # re copiées
+        # chemin ou les cartes vont être copiées
         self.outPath = f"{Card.ImageOutPath}/{name}"
         # nom du fichier Image de la carte
         self.imageFilename = cardImg    
