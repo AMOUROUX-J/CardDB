@@ -197,7 +197,7 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
             "currency": card.currency,
             "cost": card.cost,
             "talent": getattr(card, 'talent', None),
-            "effects": card.effects,
+            "effects": getattr(card, 'effects', None),
             "types": getattr(card, "elementType", None),
             "crit": card.combatStat.crit,
             "race": getattr(card, "race", None),
