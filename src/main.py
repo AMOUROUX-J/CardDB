@@ -1,8 +1,9 @@
-from os import name
+from os import path
 from pathlib import Path
 from SpellCard import Spell
 from equipmentCard import Equipment
 from CreatureCard import Creature
+from Card import Card
 import json
 
 from test_card import Terrain
@@ -124,7 +125,8 @@ def readFile(name:str,cardType:str) -> Creature | Equipment | Spell | Terrain:
         Card: renvoie la carte
     """
     
-    pathToFile = f"./cardsData/{cardType}_{name}.json"
+    #pathToFile = f"./cardsData/{cardType}_{name}.json"
+    pathToFile = path.join('./',Card.CardDBOutPath,f"{cardType}_{name}.json")
     with open(file=pathToFile,encoding='utf8',mode='r') as inFile:
         data = json.load(inFile)
     
@@ -191,6 +193,7 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
             "race": getattr(card, "race", None),
             "weapon": getattr(card, "weaponType", None),
             "targeting": card.combatStat.target,
+            "imagefile": getattr(card, "imageFilename", "default.png"),
             "cardType": card.cardType
         }
         if isinstance(card,Equipment):

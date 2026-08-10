@@ -5,6 +5,9 @@ import shutil
 @dataclass
 class Card:
     
+    CardDBOutPath:str = "./cardsData"
+    ImageOutPath:str = "./imgsDataDB/cardImages"
+    
     def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, cardImg:str="imgsDataDB/cardImages/placeHolder.jpg") -> None:
         """
         crée la carte
@@ -33,13 +36,16 @@ class Card:
         # chemin ou les cartes vont être copiées
         self.outPath = f"imgsDataDB/cardImages/{name}"
         # nom du fichier Image de la carte
-        self.imageFilename:str = ""
+        self.imageFilename:str = "default.png"
          
         self.name = name
         self.cost = cost
         self.currency = currency
         self.talent = talent
         self.elementType = cardLogics.elementTest(elementType)
+        
+    def __str__(self) -> str:
+        return f"{self.name}, coût: {self.cost}, type de monnaie: {self.currency}, talent: {self.talent}, éléments: {self.elementType}"    
     
     def __eq__(self, value: object) -> bool:
         """__equals__

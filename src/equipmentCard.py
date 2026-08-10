@@ -55,7 +55,7 @@ class Equipment(Card):
         self.race = race
         
         def __str__(self) -> str:
-            return f"{self.cardType}, {self.name}"
+            return f"{self.cardType}, {self.name}: {self.equipmentType} - {self.weaponType} - {self.race}"
     
     def __eq__(self, value: object) -> bool:
         """__equals__
