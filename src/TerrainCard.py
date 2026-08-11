@@ -3,7 +3,7 @@ from Card import Card
 
 
 class Terrain(Card):
-    def __init__(self, name: str, cost: int, currency: str, effects: list[str]|str, cardImg:str=f"{Card.ImageOutPath}/placeholder.png") -> None:
+    def __init__(self, name: str, effects: list[str]|str, cardImg:str=f"{Card.ImageOutPath}/placeholder.png") -> None:
         """crée un terrain
 
         Args:
@@ -15,8 +15,6 @@ class Terrain(Card):
         if not isinstance(effects,list):
             effects = [effects,]
         self.name = name
-        self.cost = cost
-        self.currency = currency
         self.effects = effects
         self.cardType = "terrain"
         # chemin ou les cartes vont être copiées
@@ -38,8 +36,6 @@ class Terrain(Card):
 
         outTrueFalse = []
         outTrueFalse.append(self.name == value.name)
-        outTrueFalse.append(self.cost == value.cost)
-        outTrueFalse.append(self.currency == value.currency)
         outTrueFalse.append(self.effects == value.effects)
         
         return all(outTrueFalse)

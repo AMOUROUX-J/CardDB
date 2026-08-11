@@ -113,8 +113,6 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
             case "terrain":
                 return Terrain(
                     name=data["name"],
-                    cost=data["cost"],
-                    currency=data["currency"],
                     effects=data["effects"],
                     cardImg=data["imageFile"]
                 )
@@ -180,8 +178,6 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
     if isinstance(card,Terrain):
         payload = {
             "name": card.name,
-            "cost": card.cost,
-            "currency": card.currency,
             "cardType": card.cardType,
             "effects": card.effects,
             "imageFile": card.imageFilename

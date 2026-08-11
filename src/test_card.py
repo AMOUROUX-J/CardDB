@@ -181,15 +181,12 @@ class TestCard(unittest.TestCase):
         self.assertTrue(equipment1 == equipment1bis)
     
     def testCreateTerrain(self) -> None:
-        terrain = Terrain("test0",10,"money",["sert de test","n'existe pas!!"])
+        terrain = Terrain("test0",["sert de test","n'existe pas!!"])
         self.assertEqual(terrain.name, "test0")
-        self.assertEqual(terrain.cost,10)
-        self.assertNotEqual(terrain.cost, 1)
-        self.assertEqual(terrain.currency, "money")
         self.assertEqual(terrain.effects,["sert de test","n'existe pas!!"])
     
     def testWriteReadTerrain(self) -> None:
-        terrain = Terrain("test0",10,"money",["sert de test","n'existe pas!!"])
+        terrain = Terrain("test0",["sert de test","n'existe pas!!"])
         main.writeFile(terrain, True)
         terrainBis = main.readFile("test0","terrain")
         self.assertTrue(terrain == terrainBis)
