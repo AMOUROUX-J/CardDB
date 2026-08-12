@@ -66,3 +66,10 @@ class Creature(Card):
         outTrueFalse.append(self.race == value.race)
 
         return all(outTrueFalse)
+    
+    
+    
+if __name__ == "__main__":
+    
+    creature = Creature(race="humanoide",elementType="feu",name="testTest",cost=1,currency="bleu",hp=1)
+    [print(f"{key:<17}: {getattr(creature, key)}") for key in creature.__dict__.keys()]

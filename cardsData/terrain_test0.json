@@ -1,0 +1,9 @@
+{
+  "name": "test0",
+  "cardType": "terrain",
+  "effects": [
+    "sert de test",
+    "n'existe pas!!"
+  ],
+  "imageFile": "./imgsDataDB\\cardImages/placeholder.png"
+}

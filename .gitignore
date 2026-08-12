@@ -432,3 +432,5 @@ FodyWeavers.xsd
 cardDB.code-workspace
 #/cardsData/
 imgsDataDB/cardImages/
+cardsData/creature_Faiblarde.json
+cardsData/terrain_faiblard.json

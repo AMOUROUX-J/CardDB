@@ -1,33 +1,30 @@
-
+from os import path
 from Card import Card
 
 
 class Terrain(Card):
     def __init__(self, name: str, effects: list[str]|str, cardImg:str=f"{Card.ImageOutPath}/placeholder.png") -> None:
-        """crée un terrain
-
+        """ Crée une carte CardDB de type 'terrain'
         Args:
             name (str): nom du terrain
-            cost (int): coût
-            currency (str): type de coût
+            effets (list[str]): liste des effets actifs sur le terrain
+            imageFilename (str): nom du fichier de l'image représentant la carte
             effects (list[str] | str): liste des effects du terrain sur la partie
         """
+        super().__init__(name, cost=0, currency="money", talent=None, elementType=None, effects=effects, cardImg=cardImg)
+        
         if not isinstance(effects,list):
             effects = [effects,]
         self.name = name
         self.effects = effects
         self.cardType = "terrain"
-        # chemin ou les cartes vont être copiées
-        self.outPath = f"{Card.ImageOutPath}/{name}"
-        # nom du fichier Image de la carte
+        # nom absolu du fichier de l'image de la carte
         self.imageFilename = cardImg    
         
     def __eq__(self, value: object) -> bool:
         """__equals__
-
         Args:
             value (object): une autre Terrain
-
         Returns:
             bool: true si les 2 cartes ont les mêmes valeurs sur toutes les variables
         """
@@ -37,5 +34,13 @@ class Terrain(Card):
         outTrueFalse = []
         outTrueFalse.append(self.name == value.name)
         outTrueFalse.append(self.effects == value.effects)
+        outTrueFalse.append(self.imageFilename == value.imageFilename)
         
         return all(outTrueFalse)
+    
+
+if __name__ == "__main__":
+        
+    terrain = Terrain("test0",["sert de test","n'existe pas!!"])
+    [print(f"{key:17}: {getattr(terrain, key)}") for key in terrain.__dict__.keys() ]
+    

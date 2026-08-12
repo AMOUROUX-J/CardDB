@@ -1,5 +1,5 @@
 {
-  "name": "ewe",
+  "name": "Ewe",
   "hp": 15,
   "atk": 10,
   "def": 0,
@@ -8,9 +8,7 @@
   "cost": 5,
   "talent": "increvable",
   "effects": [
-    "vole vos sous",
-    "Seconde chance",
-    "créatrice de frac"
+    null
   ],
   "types": [
     "special"
@@ -20,5 +18,5 @@
   "weapon": "lourd",
   "targeting": "mono",
   "cardType": "creature",
-  "imageFile": "./imgsDataDB/cardImages/placeholder.png"
+  "imageFile": "././imgsDataDB\\cardImages\\placeholder.png"
 }

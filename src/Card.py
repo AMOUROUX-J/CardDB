@@ -1,11 +1,13 @@
+
 from dataclasses import dataclass
+import os.path as osp
 import cardLogics
 
 @dataclass
 class Card:
     
-    CardDBOutPath:str = "./cardsData"
-    ImageOutPath:str = "./imgsDataDB/cardImages"
+    CardDBOutPath:str = osp.join("./","cardsData")
+    ImageOutPath:str = osp.join("./","imgsDataDB","cardImages")
     
     def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, effects:list[str|None]|str|None=None, cardImg:str=f"{ImageOutPath}/placeholder.png") -> None:
         """
@@ -35,10 +37,12 @@ class Card:
         if not isinstance(effects, list): 
             effects = [effects,]
         
-        # chemin ou les cartes vont être copiées
-        self.outPath = f"{Card.ImageOutPath}/{name}.png".replace(" ","_")
-        # nom du fichier Image de la carte
+        # nom absolu du fichier Image de la carte
         self.imageFilename = cardImg
+        # ----------- récupération de l'extension du fichier image ------------
+        fname, ext = osp.splitext(cardImg)
+        # -------- Nom de l'image et chemin ou elle doit être copiées ---------
+        self.outPath = osp.join("./",Card.ImageOutPath,f"CardType_{name.replace(" ","_")}{ext}")
         
         self.name = name.replace(" ","_")
         self.cost = cost
@@ -71,3 +75,10 @@ class Card:
         
         return all(outTrueFalse)
 
+
+
+
+if __name__ == "__main__":
+    
+    card = Card("test1",2,"bleu",None,None)
+    [print(f"{key:<17}: {getattr(card, key)}") for key in card.__dict__.keys()]

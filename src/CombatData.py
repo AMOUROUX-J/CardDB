@@ -17,7 +17,6 @@ class CombatData:
         Raises:
             ValueError: si pv|atk|def<0 ou si le crit ne correspond pas a un dé ou si le ciblage n'existe pas
         """
-        
         if target : target = target.lower()
         if hp<0 :
             raise ValueError("valeur PV impossible")

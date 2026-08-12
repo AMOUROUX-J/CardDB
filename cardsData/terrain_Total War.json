@@ -1,7 +1,5 @@
 {
   "name": "Total War",
-  "cost": 10,
-  "currency": "money",
   "cardType": "terrain",
   "effects": [
     "Seconde chance",
