@@ -434,3 +434,5 @@ cardDB.code-workspace
 imgsDataDB/cardImages/
 cardsData/creature_Faiblarde.json
 cardsData/terrain_faiblard.json
+src/setup.py
+src/build/
