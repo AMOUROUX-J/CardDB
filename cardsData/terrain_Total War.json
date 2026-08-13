@@ -1,9 +1,0 @@
-{
-  "name": "Total War",
-  "cardType": "terrain",
-  "effects": [
-    "Seconde chance",
-    "créatrice de frac"
-  ],
-  "imageFile": "././imgsDataDB/cardImages\\total_war.png"
-}

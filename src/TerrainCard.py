@@ -4,14 +4,14 @@ from Card import Card
 
 class Terrain(Card):
     def __init__(self, name: str, effects: list[str]|str, cardImg:str=f"{Card.ImageOutPath}/placeholder.png") -> None:
-        """ Crée une carte CardDB de type 'terrain'
+        r""" Crée une carte CardDB de type 'terrain'
         Args:
             name (str): nom du terrain
             effets (list[str]): liste des effets actifs sur le terrain
-            imageFilename (str): nom du fichier de l'image représentant la carte
+            cardImg (str): le chemin de l'image (sera copier dans : imgsDataDB\cardImages\)
             effects (list[str] | str): liste des effects du terrain sur la partie
         """
-        super().__init__(name, cost=0, currency="money", talent=None, elementType=None, effects=effects, cardImg=cardImg)
+        super().__init__(name, cost=0, currency="money", talent=None, elementType=None, effects=effects, cardImg=cardImg) # pyright: ignore[reportArgumentType]
         
         if not isinstance(effects,list):
             effects = [effects,]
@@ -37,10 +37,3 @@ class Terrain(Card):
         outTrueFalse.append(self.imageFilename == value.imageFilename)
         
         return all(outTrueFalse)
-    
-
-if __name__ == "__main__":
-        
-    terrain = Terrain("test0",["sert de test","n'existe pas!!"])
-    [print(f"{key:17}: {getattr(terrain, key)}") for key in terrain.__dict__.keys() ]
-    

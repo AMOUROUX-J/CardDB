@@ -430,7 +430,7 @@ FodyWeavers.xsd
 
 # custom made by us
 cardDB.code-workspace
-#/cardsData/
+/cardsData/
 imgsDataDB/cardImages/
 cardsData/creature_Faiblarde.json
 cardsData/terrain_faiblard.json

@@ -11,7 +11,7 @@ class Equipment(Card):
                 hp:int=0, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None, talent: str|None=None, effects:list[str|None]|str|None=None,
                 race:list[str]=[], cardImg:str=f"{Card.ImageOutPath}/placeholder.png"
                 ) -> None:
-        """
+        r"""
         crée l'équipement (armure ou arme)
 
         Args:
@@ -28,8 +28,10 @@ class Equipment(Card):
             heal (int, optional): valeur de soin. Defaults to 0.
             target (str | None, optional): type de ciblage. Defaults to None.
             talent (list[str] | None, optional): si a telents les listes. Defaults to None.
+            effects (list[str] | str | None): si a des effets, les quels
             race (list[str], optional): quelle race peut s'équiper de cette arme. Defaults to [].
-            
+            cardImg (str): le chemin de l'image (sera copier dans : imgsDataDB\cardImages\)
+
         Raises:
             ValueError: si race|arme|elements absent des règles
         """

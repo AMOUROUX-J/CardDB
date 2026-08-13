@@ -92,6 +92,7 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                     itemType=data["itemType"],
                     cardImg=data["imageFile"]
             )
+            
             case "spell":
                 return Spell(
                     name=data["name"],
@@ -111,12 +112,14 @@ def createCard(Cardtype:str, data:dict={}) -> Creature | Equipment | Spell | Ter
                     typeSort=data["typeSort"],
                     cardImg=data["imageFile"]
                 )
+                
             case "terrain":
                 return Terrain(
                     name=data["name"],
                     effects=data["effects"],
                     cardImg=data["imageFile"]
                 )
+                
             case _:
                 raise ValueError("type de carte non supporté")
 
@@ -205,39 +208,21 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
         }
         if isinstance(card,Equipment):
             payload["weaponType"]= card.weaponType
-            payload["itemType"]=card.equipmentType # pyright: ignore[reportAttributeAccessIssue]
+            payload["itemType"]=card.equipmentType
 
         if isinstance(card,Spell):
-            payload["typeSort"]=card.typeSort # pyright: ignore[reportAttributeAccessIssue]
+            payload["typeSort"]=card.typeSort
             
     # ----------- creation du nom du fichier image de la carte ------------
     fname, ext = path.splitext(payload['imageFile'])
     card.outPath = sub("CardType", payload['cardType'], f"{card.outPath[:card.outPath.rfind('.')]}{ext}")
-    #card.outPath = path.join("./",Card.ImageOutPath,f"{payload['cardType']}_{payload['name']}{ext}")
-    #print(f"card.outPath: {card.outPath}")
-    #payload['outPath'] = card.outPath
         
     with open(file= pathToFile, mode="w", encoding='utf8') as outFile:
         json.dump(payload, outFile, ensure_ascii=False, indent=2)
 
     if not path.isfile(card.outPath):
-        #print(f"src: {payload['imageFile']} - dst: {card.outPath}")
         shutil.copyfile(f"{payload['imageFile']}",card.outPath)
     else:
         print(f" ---> Fichier '{card.outPath}' existe déjà!")
     
     return str(pathToFile)
-
-
-if __name__ == "__main__":
-    
-    """
-    terrain = Terrain("monster",["sert de test","n'existe pas!!"])
-    terrain.imageFilename = path.join("./",Card.ImageOutPath,"FINISH.bmp")
-    [print(f"{key:<17}: {getattr(terrain, key)}") for key in terrain.__dict__.keys()]
-    writeFile(terrain, overwrite=True)
-    """
-    creature = Creature(race="humanoide",elementType="feu",name="cardDBTest",cost=1,currency="bleu",hp=1)
-    creature.imageFilename = path.join("./",Card.ImageOutPath,"FINISH.bmp")
-    [print(f"{key:<17}: {getattr(creature, key)}") for key in creature.__dict__.keys()]
-    writeFile(creature, overwrite=True)

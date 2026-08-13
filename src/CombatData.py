@@ -4,7 +4,7 @@ from dataclasses import dataclass
 class CombatData:
     def __init__(self, hp:int, crit:int ,atk:int=0,  defense:int=0, heal:int=0, target:str|None=None) -> None:
         """
-        détermine les attributs de combat d'une carte, l'atk et la defense sur les equipements représentent les bonus de l'équipement à son porteur
+        détermine les attributs de combat d'une carte, l'atk et la defense sur les équipements représentent les bonus de l'équipement à son porteur
 
         Args:
             hp (int): Heal Points, soit les points de vie de la carte

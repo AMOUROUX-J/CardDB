@@ -11,7 +11,7 @@ class Creature(Card):
                 cost: int, currency: str,
                 hp:int, crit:int=0 ,atk:int=0,  defense:int=0, heal:int=0, target:str="mono",weaponType:str|None=None, talent: str|None=None, effects:list[str|None]|str|None = None , cardImg:str=f"{Card.ImageOutPath}/placeholder.png"
                 ) -> None:
-        """
+        r"""
         crée la créature
 
         Args:
@@ -28,6 +28,9 @@ class Creature(Card):
             target (str, optional): type de ciblage. Defaults to "mono".
             weaponType (str, optional): type d'arme équipable. Defaults to None.
             talent (str, optional): si à talent ses talents. Defaults to None.
+            cardImg (str): le chemin de l'image (sera copier dans : imgsDataDB\cardImages\)
+            effects (list[str] | str | None): si a des effets, les quels
+            cardImg (str): le chemin de l'image (sera copier dans : imgsDataDB\cardImages\)
 
         Raises:
             ValueError: si race|arme|elements absent des règles

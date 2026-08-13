@@ -10,19 +10,21 @@ class Card:
     ImageOutPath:str = osp.join("./","imgsDataDB","cardImages")
     
     def __init__(self, name: str, cost: int, currency: str, talent: str|None, elementType:tuple[str,...]|str|None, effects:list[str|None]|str|None=None, cardImg:str=f"{ImageOutPath}/placeholder.png") -> None:
-        """
+        r"""
         crée la carte
 
         Args:
             name (str): nom de la carte
             cost (int): prix
             currency (str): type de monnaie nécessaire
-            talent (list[str] | str | None): si a des talents
+            talent (str | None): si a des talents
             elementType (list[str]): liste des éléments de la carte
+            effects (list[str] | str | None): si a des effets, les quels
+            cardImg (str): le chemin de l'image (sera copier dans : imgsDataDB\cardImages\)
 
         Raises:
             ValueError: si la monnaie de la carte n'est pas les les règles de types de monnaie
-            ValueError: si la carte coute moins que 0
+            ValueError: si la carte coûte moins que 0
         """
         
         if not name :
@@ -74,11 +76,3 @@ class Card:
         outTrueFalse.append(self.elementType == value.elementType)
         
         return all(outTrueFalse)
-
-
-
-
-if __name__ == "__main__":
-    
-    card = Card("test1",2,"bleu",None,None)
-    [print(f"{key:<17}: {getattr(card, key)}") for key in card.__dict__.keys()]
