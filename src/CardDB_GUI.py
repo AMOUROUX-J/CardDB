@@ -238,7 +238,7 @@ class List_Popup(tk.Toplevel):
         
         self.wm_attributes("-topmost", 1)                     # - Fenetre popup toujours au premier plan
         self.bind_class(self,'<Button3-Motion>',self.motion)  # - Bouton droit pour déplacer la fenètre popup
-        self.bind_class(self,"<Button-1>", self.Quit)         # - pour quitter la popupList par 'Clic Gauche'
+        self.bind_class(self,"<FocusOut>", self.Quit)         # - pour quitter la popupList par 'Clic Gauche'
         self.overrideredirect(1)                              # - Aucun bouton systeme sur la fenetre   
         
         # --------- frame avec widget label et widget liste des items --------- 
@@ -272,7 +272,10 @@ class List_Popup(tk.Toplevel):
         #self.geometry(f"{self.lst_pos}+{mousexy[0]+200}+{mousexy[1]-100}")
         self.update_idletasks()
 
-    def update_list(self, liste:list):
+    def update_list(self, liste:list|set):
+        if len(liste) > 0 and isinstance(liste, set):
+            liste.discard("None")
+            liste = list(liste)
         self.__vliste.set(liste)
         
     def get_offset(self) -> int:
@@ -344,11 +347,15 @@ class Application(tk.Tk):
         self.vmonnaie = tk.StringVar(value=self.monnaielist[0])
         self.raceslist = readRules('races')
         self.vraces = tk.StringVar(value=self.raceslist[3])
-        self.vracesequip = tk.StringVar(value=["None",])
+        self.racesequiplist = [race for race in self.raceslist + ["None",]]
+        self.vracesequip = tk.StringVar(value=self.racesequiplist[-1])
         self.multiracelist = set()
+        self.multiracelist.add('None')
+        
         self.typeffetlist = readRules('effets') 
-        self.vterraineffet = tk.StringVar(value=self.typeffetlist[-1])
+        self.veffects = tk.StringVar(value=self.typeffetlist[-1])
         self.multieffetlist = set()
+        
         # ---------------------------------------------------------------------
         self.multiSetlist = [self.multiracelist, self.multitalentlist, self.multielementlist, self.multieffetlist] 
         self.items_dico:dict = {"Talents":self.multitalentlist,  "Eléments":self.multielementlist,
@@ -415,10 +422,10 @@ class Application(tk.Tk):
         tk.Entry(self.frameCardDB,bg='ivory',font=self.itemfont,state="readonly",width=20,
                     textvariable=self.vcardimageFname).grid(row=1,column=11,columnspan=4,pady=4,sticky="nw")
         tk.Button(self.frameCardDB,text=" Choisir Image ",command=self.select_imageFile,
-                            font=self.lblfont).grid(row=1,column=16,columnspan=2,pady=3,sticky="nw")
+                            font=self.lblfont).grid(row=1,column=16,columnspan=2,pady=3,sticky="new")
         # ---------------------------------------------------------------------
         frametalents = My_LabelFrame(globalframe,col=10,row=3,cspan=10,rspan=3,bg=globalframe.cget('bg'),
-                                                                  pad=(0,7,0,3),bd=2,relief="ridge",sticky="new") 
+                                                                  pad=(0,9,0,3),bd=2,relief="ridge",sticky="new") 
         tk.Label(frametalents,text=" Talent(s)      : ",bg=frametalents.cget('bg'),
                                font=self.itemfont).grid(row=0,column=0,columnspan=2,pady=4,sticky="nw")
         self.talentsCombobox = ttk.Combobox(frametalents,background=globalframe.cget('bg'),width=10,
@@ -442,38 +449,46 @@ class Application(tk.Tk):
                                                 state="readonly",name="!elementsCombobox",textvariable=self.velementstype)
         self.elementsCombobox.grid(column=2,row=2,columnspan=8,padx=2,pady=4,sticky="new")
         tk.Button(frametalents,text="Ajouter/Visualiser la liste des éléments",font=self.lblfont,
-                                  command=self.__add_element).grid(column=0,row=3,columnspan=10,padx=3,sticky="ew")
+                                  command=self.__add_element).grid(column=0,row=3,columnspan=10,padx=3,pady=4,sticky="ew")
         # ---------------------------------------------------------------------
         texte = " Données statistiques de combat "
         frameproperty = My_LabelFrame(globalframe,col=0,row=3,cspan=10,rspan=3,bd=2,bg=globalframe.cget('bg'),
-                                               font=self.lblfont,text=texte,pad=(0,7,0,3),relief="ridge",sticky="new")  
-        tk.Label(frameproperty,text=" Points de vie   :",bg=frameproperty.cget('bg'),
-                               font=self.itemfont).grid(row=0,column=0,columnspan=3,pady=4,sticky="nw")
+                                               font=self.lblfont,text=texte,pad=(0,0,0,3),relief="ridge",sticky="new")  
+        tk.Label(frameproperty,text=" Points de vie    : ",bg=frameproperty.cget('bg'),
+                               font=self.itemfont).grid(row=0,column=0,columnspan=4,pady=0,sticky="nw")
         tk.Entry(frameproperty,bg='ivory',textvariable=self.vhp,width=3,
-                                  font=self.itemfont).grid(column=3,row=0,columnspan=1,pady=4,sticky="nw")
-        tk.Label(frameproperty,text=" MédiPack   : ",bg=frameproperty.cget('bg'),
-                               font=self.itemfont).grid(row=0,column=4,columnspan=1,pady=4,sticky="nw")
+                                  font=self.itemfont).grid(column=4,row=0,columnspan=1,pady=0,sticky="nw")
+        tk.Label(frameproperty,text=f" {'Soin':<18}: ",bg=frameproperty.cget('bg'),
+                               font=self.itemfont).grid(row=0,column=5,columnspan=3,pady=0,sticky="nw")
         tk.Entry(frameproperty,bg='ivory',textvariable=self.vheal,width=3,
-                                  font=self.itemfont).grid(column=5,row=0,columnspan=1,pady=4,sticky="nw")
-        tk.Label(frameproperty,text=" Points d'attaque:",bg=frameproperty.cget('bg'),
-                               font=self.itemfont).grid(row=1,column=0,columnspan=3,pady=4,sticky="nw")
+                                  font=self.itemfont).grid(column=8,row=0,columnspan=2,pady=0,sticky="nw")
+        tk.Label(frameproperty,text=" Points d'attaque : ",bg=frameproperty.cget('bg'),
+                               font=self.itemfont).grid(row=1,column=0,columnspan=4,pady=3,sticky="nw")
         tk.Entry(frameproperty,bg='ivory',textvariable=self.vatk,width=3,
-                                  font=self.itemfont).grid(column=3,row=1,columnspan=1,pady=4,sticky="nw")
+                                  font=self.itemfont).grid(column=4,row=1,columnspan=1,pady=3,sticky="nw")
         tk.Label(frameproperty,text=" Points de défense :",bg=frameproperty.cget('bg'),
-                               font=self.itemfont).grid(row=1,column=4,columnspan=3,pady=4,sticky="nw")
+                               font=self.itemfont).grid(row=1,column=5,columnspan=3,pady=3,sticky="nw")
         tk.Entry(frameproperty,bg='ivory',textvariable=self.vdef,width=3,
-                                  font=self.itemfont).grid(column=7,row=1,columnspan=1,pady=4,sticky="nw")
-        tk.Label(frameproperty,text=" Valeur critique :",bg=frameproperty.cget('bg'),
-                               font=self.itemfont).grid(row=2,column=0,columnspan=3,pady=4,sticky="nw")
+                                  font=self.itemfont).grid(column=8,row=1,columnspan=2,pady=3,sticky="nw")
+        tk.Label(frameproperty,text=" Valeur critique  : ",bg=frameproperty.cget('bg'),
+                               font=self.itemfont).grid(row=2,column=0,columnspan=4,sticky="nw")
         ttk.Spinbox(frameproperty,background='ivory',command=None,font=self.itemfont,
                                       values=self.typecritlist,width=3,textvariable=self.vtypecrit,
-                                            state="readonly",wrap=True).grid(column=3,row=2,pady=4,sticky="nw")
+                                            state="readonly",wrap=True).grid(column=4,row=2,pady=0,sticky="nw")
         tk.Label(frameproperty,text=" Ciblage     : ",bg=frameproperty.cget('bg'),
-                               font=self.itemfont).grid(row=2,column=4,columnspan=1,pady=4,sticky="nw")
+                               font=self.itemfont).grid(row=2,column=5,columnspan=2,pady=0,sticky="nw")
         self.targetCombobox = ttk.Combobox(frameproperty,background=globalframe.cget('bg'),width=10,
                                             font=self.itemfont,postcommand=None,values=list(self.typetargetlist),
                                                 state="readonly",name="!elementsCombobox",textvariable=self.vtypetarget)
-        self.targetCombobox.grid(column=5,row=2,columnspan=5,padx=2,pady=4,sticky="new")
+        self.targetCombobox.grid(column=7,row=2,columnspan=2,padx=2,pady=3,sticky="nw")
+        tk.Label(frameproperty,text=f" {'Effets':<17}: ",bg=frameproperty.cget('bg'),
+                               font=self.itemfont).grid(row=3,column=0,columnspan=4,pady=3,sticky="nw")
+        self.targetCombobox = ttk.Combobox(frameproperty,background=globalframe.cget('bg'),width=10,
+                                            font=self.itemfont,postcommand=None,values=list(self.typeffetlist),
+                                                state="normal",name="!effectsCombobox",textvariable=self.veffects)
+        self.targetCombobox.grid(column=4,row=3,columnspan=3,pady=3,sticky="new")
+        tk.Button(frameproperty,text=" Add/Suppr. Effets ",font=self.lblfont,
+                                   command=self.__add_effect).grid(column=7,row=3,columnspan=3,padx=3,pady=3,sticky="new")
         # ----------- frame des attributs spécifiques à Equipement ------------
         self.equipementFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,
                                                                   bg="#E9FAD8",name="!equipementFrame",sticky="sew")
@@ -494,7 +509,7 @@ class Application(tk.Tk):
         tk.Label(self.equipementFrame,text=" Races équipées :",bg=self.equipementFrame.cget('bg'),
                                font=self.itemfont).grid(row=0,column=6,columnspan=6,sticky="w")
         self.racesEquipCombobox = ttk.Combobox(self.equipementFrame,background=self.equipementFrame.cget('bg'),
-                                        font=self.itemfont,postcommand=None,values=list(self.raceslist),
+                                        font=self.itemfont,postcommand=None,values=list(self.racesequiplist),
                                                 state="readonly",name="!racesCombobox",textvariable=self.vracesequip)
         self.racesEquipCombobox.grid(column=12,row=0,columnspan=8,pady=2,sticky="w")
         tk.Button(self.equipementFrame,text="Ajouter/Visualiser la liste des races",font=self.lblfont,
@@ -507,17 +522,19 @@ class Application(tk.Tk):
                                         font=self.itemfont,postcommand=None,values=self.typesortlist,
                                              state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
         self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=14,sticky="w")
+        """
         # ------------ frame des attributs spécifiques au terrain -------------
         self.terrainFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,bg="#F3D6B6",name="!terrainFrame",sticky="sew")
         tk.Label(self.terrainFrame,anchor="center",bg=self.terrainFrame.cget('bg'),text=f"{' Type d\'effet :':>20}",
                                               font=self.itemfont).grid(row=0,column=0,columnspan=2,pady=14,sticky="w")
         self.terrainCombobox = ttk.Combobox(self.terrainFrame,background=self.terrainFrame.cget('bg'),
                                             font=self.itemfont,postcommand=None,values=self.typeffetlist,
-                                              state="readonly",name="!terrainCombobox",textvariable=self.vterraineffet)
+                                              state="readonly",name="!terrainCombobox",textvariable=self.veffects)
         self.terrainCombobox.grid(column=2,row=0,columnspan=4,pady=14,sticky="w")
         tk.Button(self.terrainFrame,text="Ajouter/Visualiser la liste des effets",font=self.lblfont,
-                                command=self.__add_effet).grid(column=6,row=0,columnspan=14,padx=3,pady=14,sticky="ew")
+                                command=self.__add_effect).grid(column=6,row=0,columnspan=14,padx=3,pady=14,sticky="ew")
         # ----------------- frame boutons save/default/cancel -----------------
+        """
         buttonsFrame = My_LabelFrame(self,col=0,row=9,cspan=22,pad=(2,0,0,3))
         tk.Button(buttonsFrame,text=" RàZ Défaut ",bg="#FDEED0",command=self.__raz_default,
                                             font=self.frmfont).grid(column=2,row=0,columnspan=3,sticky="ew")
@@ -530,7 +547,7 @@ class Application(tk.Tk):
         tk.Button(buttonsFrame,text=" Annuler/Quitter ",command=self.Quit,bg="#FCC6C6",
                                            font=self.frmfont).grid(column=18,row=0,columnspan=2,sticky="ew")
         # ---------------------------------------------------------------------
-        self.framelist = set({self.equipementFrame,self.spellFrame,self.terrainFrame})
+        self.framelist = set({self.equipementFrame,self.spellFrame})  #,self.terrainFrame})
         self.comboxCardType.event_generate("<<ComboboxSelected>>")
         self.state_bar.update_vltexte("",0)
         # ---------------------------------------------------------------------
@@ -547,10 +564,10 @@ class Application(tk.Tk):
             path, ext = osp.splitext(dummyFile)
             filename = osp.join(Card.ImageOutPath,
                          f"{self.vcardtype.get()}_{self.vname.get().replace(' ','_')}{ext}")
-            # -- Copie du fichier image dans le dossier des Images de CardDB --
+            # -- Copie du fichier image dans le dossier des Images de CardDB --    
             if not osp.isfile(filename): shutil.copyfile(dummyFile, filename)                
             # -- chargement de la nouvelle image/nouveau nom dans le canevas --
-            self.newImage = self.preload_cardDB_Image(osp.basename(filename)) 
+            self.newImage = self.preload_cardDB_Image(osp.basename(filename))
             self.cardDBcanvas.itemconfigure(self.cardDB_image, image = self.newImage)
             # ---------- mise à jour de la variable ...cardimage... -----------
             #self.vcardimageFname.set(osp.basename(dummyFile))
@@ -586,7 +603,7 @@ class Application(tk.Tk):
         self.vhp.set(0); self.vatk.set(0); self.vdef.set(0); self.vheal.set(0); self.vname.set(""); self.vtypecrit.set(0)
         self.velementstype.set('None'); self.vtalentstype.set('None'); self.varmes.set('None'); self.vcost.set(1)
         self.vtypetarget.set('mono') if self.vcardtype.get()=="creature" else self.vtypetarget.set('None')
-        self.vracesequip.set('None'); self.vterraineffet.set('None'); self.vcardimageFname.set("")
+        self.vracesequip.set('None'); self.veffects.set('None'); self.vcardimageFname.set("")
         # -------- effacement des listes des effets, elements et races --------
         self.__clear_multisetlist__()
     
@@ -595,12 +612,14 @@ class Application(tk.Tk):
         [setlist.clear() for setlist in self.multiSetlist]
         #[print(setlist) for setlist in self.multiSetlist] 
         
-    def __add_effet(self, event:tk.Event=None):
+    def __add_effect(self, event:tk.Event=None):
         """ Méthode privée de création du set() des effets """
-        if not self.vterraineffet.get() == 'None':
-            self.multieffetlist.add(self.vterraineffet.get())
+        if not self.veffects.get() == 'None':
+            effect = self.veffects.get()
+            self.multieffetlist.add(effect) if effect not in self.multieffetlist else self.multieffetlist.discard(effect)
             try:
                 popup = self.nametowidget("!list_popupEffets")
+                if not self.multieffetlist: popup.Quit()
                 popup.update_list(self.get_effets())
             except KeyError:    
                 self.popupeffets = self.__show_popup_items(item='Effets')
@@ -612,9 +631,11 @@ class Application(tk.Tk):
     def __add_element(self, event:tk.Event=None):
         """ Méthode privée de création du set() des éléments """
         if not self.velementstype.get() == 'None':
-            self.multielementlist.add(self.velementstype.get())
+            element = self.velementstype.get()
+            self.multielementlist.add(element) if element not in self.multielementlist else self.multielementlist.discard(element) 
             try:
                 popup = self.nametowidget("!list_popupEléments")
+                if not self.multielementlist: popup.Quit()
                 popup.update_list(self.get_elements())
             except KeyError:
                 self.popupelements = self.__show_popup_items(item='Eléments')
@@ -625,14 +646,14 @@ class Application(tk.Tk):
 
     def __add_race(self, event:tk.Event=None):
         """ Méthode privée de création du set() des races des équipements """
-        if not self.vracesequip.get() == 'None':
-            self.multiracelist.add(self.vracesequip.get())
-            self.multiracelist.discard('None')
-            try:
-                popup = self.nametowidget("!list_popupRaces")
-                popup.update_list(self.get_races())
-            except KeyError:
-                self.popupraces = self.__show_popup_items(item='Races')
+        race = self.vracesequip.get()
+        self.multiracelist.add(race) if not race in self.multiracelist else self.multiracelist.discard(race)
+        try:
+            popup = self.nametowidget("!list_popupRaces")
+            if not self.multiracelist: popup.Quit()
+            popup.update_list(self.multiracelist)
+        except KeyError:
+            self.popupraces = self.__show_popup_items(item='Races')
         
     def get_races(self) -> list:
         """ Retourne la liste des 'races équipables' par conversion en list() """
@@ -734,7 +755,7 @@ class Application(tk.Tk):
                 self.vtypesort.set(cardDB.typeSort)
             case "terrain":
                 [self.multieffetlist.add(effet) for effet in cardDB.effects] if cardDB.effects else self.multieffetlist.add('None')
-                self.vterraineffet.set(list(self.multieffetlist)[0])
+                self.veffects.set(list(self.multieffetlist)[0])
         # ---------- chargement et affichage de l'image de la carte -----------
         self.newImage = self.preload_cardDB_Image(osp.basename(self.vcardimageFname.get()))
         if self.newImage:
