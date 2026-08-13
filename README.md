@@ -79,7 +79,7 @@ CardDB est conçu pour offrir une gestion complète et flexible d'une base de do
 
 **Lancement de l'interface graphique**
 
-![alt text](readMePNG\image.png)
+![alt text](./readMePNG/image.png)
 
 les champs se remplissent via les cases associées
 
