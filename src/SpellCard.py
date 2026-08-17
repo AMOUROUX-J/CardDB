@@ -14,11 +14,11 @@ class Spell(Card):
         if typeSort.lower() not in cardLogics.readRules("sort"):
             raise ValueError("type de sort innexistant")
         
-        if race not in cardLogics.readRules("races") and not race == None:
-            raise ValueError("race innexistante")
+        #if race not in cardLogics.readRules("races") and not race == None:
+        #    raise ValueError("race innexistante")
         
-        if weaponType not in cardLogics.readRules("armes") and not weaponType == None:
-            raise ValueError("type d'arme erreur")
+        #if weaponType not in cardLogics.readRules("armes") and not weaponType == None:
+        #    raise ValueError("type d'arme erreur")
         
         self.elementType = cardLogics.elementTest(elementType)
             

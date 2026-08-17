@@ -35,16 +35,16 @@ class Equipment(Card):
         Raises:
             ValueError: si race|arme|elements absent des règles
         """
-        if isinstance(race, list) and race:
-            race = [i.lower() for i in race]
+        if race and isinstance(race, list):
+            #race = [i.lower() for i in race]
             for i in race:
-                if i not in cardLogics.readRules("races"):
+                if i.lower() not in cardLogics.readRules("races"):
                     raise ValueError("race inexistante")
         else :
-            if race not in cardLogics.readRules("races") and not race == []:
+            if race and not race in cardLogics.readRules("races"):
                 raise ValueError("race inexistante")
             
-        if weaponType not in cardLogics.readRules("armes") and not weaponType == None:
+        if weaponType and not weaponType in cardLogics.readRules("armes"):
             raise ValueError("type d'arme erreur")
         
         

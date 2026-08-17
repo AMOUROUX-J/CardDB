@@ -222,7 +222,7 @@ def writeFile(card:Equipment | Creature | Spell | Terrain, overwrite: bool = Fal
 
     if not path.isfile(card.outPath):
         shutil.copyfile(f"{payload['imageFile']}",card.outPath)
-    else:
-        print(f" ---> Fichier '{card.outPath}' existe déjà!")
+    #else:
+    #    print(f" ---> Fichier '{card.outPath}' existe déjà!")
     
     return str(pathToFile)
