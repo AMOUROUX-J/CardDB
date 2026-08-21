@@ -436,3 +436,8 @@ cardsData/creature_Faiblarde.json
 cardsData/terrain_faiblard.json
 src/setup.py
 src/build/
+coreDataDB/armes copy
+coreDataDB/effets copy
+coreDataDB/elements copy
+coreDataDB/races copy
+coreDataDB/talents copy
