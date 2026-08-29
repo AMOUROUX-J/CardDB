@@ -1,6 +1,6 @@
 # -- encode utf-8 --
 """
-CARDDB Handler - Une étude Python POO pour la saisie des données des types de cartes 
+CardDB-GUI v1.2 - Une étude Python POO pour la saisie des données des types de cartes 
 'creature', 'equipement' et 'spell' du jeu CARDDB en mode graphique (TKinter).
 Copyright (c) 2026 Jan AMOUROUX - étude moteur du jeu pour la création des cartes. 
 Copyright (C) 2026 Bernard AMOUROUX - étude Tkinter
@@ -31,7 +31,7 @@ __date__ = "$Date: 2026/08/01 07:00 $"
 __copyright__ = "Copyright (c) 2026 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
-from imaplib import Commands
+#import re
 import locale
 import os, sys
 import tkinter as tk
@@ -39,7 +39,6 @@ import tkinter.ttk as ttk
 import os.path as osp
 import shutil
 
-from re import sub
 from Card import Card
 from SpellCard import Spell
 from PIL import Image,ImageTk
@@ -48,6 +47,7 @@ from main import writeFile,readFile
 from typing import Literal,get_args
 from tkinter.filedialog import askopenfilename
 from equipmentCard import Equipment
+from cardDB_HLP import Help_System
 from CreatureCard import Creature
 from cardLogics import readRules
 from tkinter.font import Font
@@ -57,9 +57,7 @@ itemstypeList = get_args(ITEMSTYPE)
 
 class My_LabelFrame(tk.LabelFrame):
     """ classe héritant de tkinter.LabelFrame() qui se crée et se place 
-        sur la grille en une ligne de commandes. Par défaut, la couleur de fond
-        sera 'ivoire', une largeur de bordure de 3, un relief de périmètre 'groove'
-        et un ancrage de label s'il y a au centre en haut. 
+        sur la grille en une ligne de commandes.
     """
     def __init__(self,master,col=0,row=0,cspan=1,rspan=1,pad=(0,0,0,0),sticky='nsew', *args, **kwargs):
 
@@ -137,9 +135,7 @@ class Window_StateBar(tk.Frame):
             self.__raz_vltexte__()
         elif wait > 1:
             self.__waitnbr = self.after(self.__defaultTime if wait==None else (wait*1000) , self.__raz_vltexte__)
-            self.__vl_texte.set(msg)            
-        elif wait == 1:    
-            self.__vl_texte.set(msg)
+        if msg: self.__vl_texte.set(msg)            
         super().update_idletasks()
 
     @property
@@ -246,8 +242,8 @@ class List_Popup(tk.Toplevel):
         frm_font = Font(family="Courier New",size=10,weight="normal",slant="italic")
         
         self.wm_attributes("-topmost", 1)                     # - Fenetre popup toujours au premier plan
-        self.bind_class(self,'<Button1-Motion>',self.motion)  # - Bouton droit pour déplacer la fenètre popup
-        #self.bind_class(self,"<Button-3>", self.Quit)         # - pour quitter la popupList par 'Clic Gauche'
+        self.bind_class(self,'<Button1-Motion>',self.motion)  # - Bouton gauche pour déplacer la fenètre popup
+        self.bind_class(self,"<Button-2>", self.Quit)         # - pour quitter la popupList par 'Clic Molette'
         self.overrideredirect(1)                              # - Aucun bouton systeme sur la fenetre   
         
         # --------- frame avec widget label et widget liste des items --------- 
@@ -267,7 +263,6 @@ class List_Popup(tk.Toplevel):
         popup_h = self.winfo_height()
 
         offset = self.get_offset()
-        #print(f"offset: {offset}")
         
         x = main_x + main_w + (offset//15)
         y = main_y + offset
@@ -295,9 +290,8 @@ class List_Popup(tk.Toplevel):
         self.geometry(f"{self.lst_pos}+{mousexy[0]}+{mousexy[1]}")
         
     def Quit(self, event:tk.Event=None):
-        """ Sortie de la boucle principale et non fermeture de la fenetre """
+        """ fermeture de la fenetre """
         self.destroy()           # Exit mainloop()
-
 
 
 class PopupMenu(tk.Menu):
@@ -354,8 +348,8 @@ class PopupMenu(tk.Menu):
                 self.add_separator()
             else:
                 self.add_command(label=command[0],accelerator=command[1],command=command[2])   
-        
 
+        
 class Application(tk.Tk):
     
     def __init__(self):
@@ -371,9 +365,10 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         self.MessageBox = Win_MessageBox(self, msgtext=('Courier New', 14, 'normal', 'italic'))  
         self.state_bar = Window_StateBar(self,"",0,0,10,cspan=18,bg='tan',pady=3,txtfont=self.lblfont)                                         
-        self.state_bar.message = " Info : 'Clic-Droit' ou 'Ctrl-M' pour le menu contextuel de CardDB-GUI v2.0"
+        self.state_bar.message = " Info : 'Clic-Droit' ou 'Ctrl-M' pour le menu contextuel, F1 aide de CardDB-GUI v1.2"
         self.backup_bar = Window_StateBar(self,"",0,18,10,cspan=4,bg='wheat',pady=3,txtfont=self.lblfont)
         self.backup_bar.message = " Info : Aucune liste déroulante sauvegardée "
+        self.cardDBhelp = Help_System(self)
         # ---------------------------------------------------------------------
         self.button_add = tk.PhotoImage(file=osp.join("./","imgsDataDB","add-file-32.png"))
         self.button_suppr = tk.PhotoImage(file=osp.join("./","imgsDataDB","delete-file-32.png"))
@@ -386,18 +381,19 @@ class Application(tk.Tk):
         # ------------- Création virtual-Event menu contextuel ----------------
         self.event_add("<<PopupMenu>>","<Control-M>","<Control-m>","<Button-3>")
         # ----------------------- EDT main poup menu --------------------------
-        commandsList = [(" Backup des Listes en quittant"," On/Off ",self.__toggle_backupList),
+        commandsList = [(" Backup des Listes en quittant","On/Off ",self.__toggle_backupList),
                         ("separator","",None),
                         (" Mode plein écran on/off","F11",self.__toggle_fullscreen),
                         ("separator","",None),
-                        (" A propos de OGG","",self.fenetre_a_propos),
-                        (" Aide de OGG","F1",None),
+                        (" A propos de  CardDB-GUI","Alt-F1",self.fenetre_a_propos),
+                        (" Aide de CardDB-GUI","F1",self.__show_wholeHelp),
                         ("separator","",None),
-                        (" Quitter OGG "," Alt-F4 ",self.Quit)]
-        self.cardDBMenu = PopupMenu(self, "        CardDB-GUI v2.0, PopupMenu", commandsList, nosel=[7])
+                        (" Quitter CardDB-GUI ","Alt-F4 ",self.Quit)]
+        self.cardDBMenu = PopupMenu(self, "        CardDB-GUI v1.2, PopupMenu", commandsList, nosel=[])
         # ---------------------------------------------------------------------
-        self.bind('<F1>', self.fenetre_a_propos)
+        self.bind('<F1>', self.__show_wholeHelp)
         self.bind("<F11>",self.__toggle_fullscreen)
+        self.bind("<Alt-F1>", self.fenetre_a_propos)
         self.bind("<Escape>", self.__exit_fullscreen)
         self.bind_class(self, "<<PopupMenu>>", self.cardDBMenu.show_Menu_Popup)
         self.columnconfigure(list(range(20)), minsize=40, weight=1)
@@ -706,7 +702,11 @@ class Application(tk.Tk):
         self.framelist = set({self.equipementFrame,self.spellFrame}) #,self.terrainFrame})
         self.state_bar.update_vltexte("",0); self.backup_bar.update_vltexte("",0)
         self.comboxCardType.event_generate("<<ComboboxSelected>>")
+        self.__raz_default(cardtype='creature',race='humanoide')
         # ---------------------------------------------------------------------
+
+    def __show_wholeHelp(self, event:tk.Event=None):
+        self.cardDBhelp.show_whole_help()
 
     def select_imageFile(self) -> str:
         title = "Choix du fichier Image"
@@ -752,21 +752,36 @@ class Application(tk.Tk):
         else:
             self.state_bar.update_vltexte(f" Info : modèle de carte CardDB '{item}' non reconnu.")
             
-    def __raz_default(self):
+    def __raz_default(self,**filters):
+        """ Re-initialise les valeurs par défaut des attributs des types de cartes.
+            Paramètre:
+                filters: un dictionnaire dont les clés sont : race, talent, effet, element, image et cardtype
+                         La syntaxe est de la forme 'clé=valeur' pour passer les paramètres. 
+                         Exemple: self.__raz-default(race="humanoide", cardtype="creature") pour les 6 clés définies. 
+            Retour: le type de carte à créer si nécessaire.             
+        """
+        # ----- Options par defaut lors d'une RAZ des données des cartes ------
+        tab_options:dict = {'race' :'humanoide',       'talent'  :'None',     'effet'  :'None',
+                            'image':"placeholder.png", "cardtype":"creature", 'element':'None'  }
+        for key in list(tab_options.keys()):
+            if filters.get(key, None) == None: filters[key] = tab_options.get(key, None)
         # ------------------ affichage de l'image par defaut ------------------
-        self.newImage = self.preload_cardDB_Image("placeholder.png")
+        self.newImage = self.preload_cardDB_Image(filters["image"])
         self.cardDBcanvas.itemconfigure(self.cardDB_image, image = self.newImage)
         # --------- suppression complete des fenetres popup ouvertes ----------
         [self.nametowidget(popup).destroy() for popup in list(filter(lambda name:"!list_popup" in name, self.children.keys()))]
         # --------------- RàZ des champs de saisies des widgets ---------------
-        self.vhp.set(0); self.vatk.set(0); self.vdef.set(0); self.vheal.set(0); self.vname.set(""); self.vtypecrit.set(0)
-        self.velementstype.set('None'); self.vtalentstype.set('None'); self.varmes.set('None'); self.vcost.set(1)
+        self.vcardtype.set(filters["cardtype"]); self.vcost.set(1); self.vhp.set(0)
+        self.veffects.set(filters["effet"]); self.vatk.set(0); self.vracesequip.set('None')
         self.vtypetarget.set('mono') if self.vcardtype.get()=="creature" else self.vtypetarget.set('None')
-        self.vracesequip.set('None'); self.veffects.set('None'); self.vcardimageFname.set("")
+        self.vdef.set(0); self.vheal.set(0); self.vname.set(""); self.vtypecrit.set(0); self.varmes.set('None')
+        self.vraces.set(filters["race"]); self.vcardimageFname.set(osp.basename(self.vcardimageFname.get()))
+        self.velementstype.set(filters["element"]); self.vtalentstype.set(filters["talent"])
         # ---------- remise en place du titre Création/Modification -----------
         self.vmastertitle.initialize(" Type de carte à créer :")
         # -------- effacement des listes des effets, elements et races --------
         self.__clear_multisetlist__()
+        return filters["cardtype"]
     
     def __clear_multisetlist__(self):
         """ RAZ des listes de self.multiSetlist """
@@ -775,7 +790,8 @@ class Application(tk.Tk):
     def get_items(self, item:ITEMSTYPE):
         """ méthode qui renvoi les set() des Effets, Eléments et Races en type(list) 
             paramètre:
-                item: choix du set() à renvoyer de type ITEMSTYPE = Effets, Eléments, Races
+                item: choix du set() à renvoyer de type ITEMSTYPE = Effets, Eléments, 
+                Races et Telents.
             renvoi le set() correspondant transtypé en 'list'
         """
         return list(self.items_dico[item])
@@ -886,14 +902,15 @@ class Application(tk.Tk):
                 self.state_bar.update_vltexte(f" Info : Incompatibilité de données lors de la lecture du fichier {osp.basename(dummyFile)}" )
                 
     def __load_cardDB_card(self, cardDB:Creature|Equipment|Spell|Terrain):
-        self.__raz_default()
         self.vmastertitle.initialize(" Type de carte à modifier :")        
         # --------------------------- Fichier Image ---------------------------
         self.vcardimageFname.set(osp.basename(cardDB.imageFilename))
         # ---------------------------------------------------------------------
+        cardtype = self.__raz_default(cardtype=cardDB.cardType)
         self.vname.set(cardDB.name)
-        self.vcardtype.set(cardDB.cardType)
-        if self.vcardtype.get() != "terrain":
+        #self.vcardtype.set(cardtype)
+        #if self.vcardtype.get() != "terrain":
+        if cardtype != "terrain":
             self.vcost.set(cardDB.cost)
             self.vraces.set('None') if cardDB.cardType != 'creature' else cardDB.race
             self.vcurencytype.set(cardDB.currency)
@@ -911,7 +928,7 @@ class Application(tk.Tk):
             self.vtypecrit.set(cardDB.combatStat.crit)
             self.vtypetarget.set(cardDB.combatStat.target)
             # ---------------------------------------------------------------------
-            match self.vcardtype.get():
+            match cardtype:
                 case "equipement":
                     self.vitemtype.set(cardDB.equipmentType)
                     self.varmesequip.set(cardDB.weaponType)
@@ -921,6 +938,7 @@ class Application(tk.Tk):
                 case "spell":
                     self.vtypesort.set(cardDB.typeSort)
         else:
+            self.vraces = "None"; self.comboxRaceType.configure(state="disabled")
             [self.multieffetlist.add(effet) for effet in cardDB.effects] if cardDB.effects else self.multieffetlist.add('None')
             self.veffects.set(list(self.multieffetlist)[0])
         # ---------- chargement et affichage de l'image de la carte -----------
@@ -973,7 +991,7 @@ class Application(tk.Tk):
                                )
         terrain_card.imageFilename = osp.join("./",Card.ImageOutPath,self.vcardimageFname.get())
         return writeFile(terrain_card, overwrite=True)
-                        
+                            
     def __save_spell(self) -> str:
         # ------------------- création de l'objet 'Creature' ------------------
         spell_card = Spell( name=self.vname.get(),
@@ -1036,7 +1054,21 @@ class Application(tk.Tk):
         creature_card.imageFilename = osp.join("./",Card.ImageOutPath,self.vcardimageFname.get())
         return writeFile(creature_card,overwrite=True)
 
-    def get_combobox(self, itemtype:ITEMSTYPE) -> ttk.Combobox:
+    def __get_ItemFromCboxName(self, comboboxName:str) -> ITEMSTYPE:
+        """ Méthode qui renvoi le nom de type ITEMSTYPE d'après le 'ttk.Combobox._name'
+            passé en paramètre 
+            Paramètre:
+                comboboxname : attribut '_name' d'une ttk.Combobox() 
+        """
+        Items_dico:dict = {"effets":"Effets","races":"Races","elements":"Eléments","talents":"Talents"}
+        return Items_dico.get(sub(r'!|Combobox',"",comboboxName).strip(), None)
+
+    def __get_ComboboxFromItem(self, itemtype:ITEMSTYPE) -> ttk.Combobox:
+        """ Renvoi le widget 'Combobox' correspondant à l'item désiré.
+            Parametre:
+                itemtype: item de type ITEMSTYPE pour lequel on veut le widget
+            Retourne la ttk.Combobox() demandée.    
+        """
         match itemtype:
             case "Effets"   : combobox = self.effetsCombobox
             case "Races"    : combobox = self.racesEquipCombobox
@@ -1045,13 +1077,13 @@ class Application(tk.Tk):
         return combobox
     
     def __toggle_backupList(self):
+        """ Met à jour la variable 'self.__saveItemsList_onQuit' qui détermine
+            si oui ou non la sauvegarde des 'values' des Combobox() se fait.
+            Mise à jour du message de la barre d'état. 
+        """
         self.__saveItemsList_onQuit = not self.__saveItemsList_onQuit
-        if not self.__saveItemsList_onQuit:
-            self.backup_bar.update_vltexte("",0)
-        else:
-            self.backup_bar.update_vltexte(" Sauvegarde des listes déroulantes Activée",1)
-            
-        print(f"self.__saveItemsList_onQuit: {self.__saveItemsList_onQuit}")
+        msg = "" if not self.__saveItemsList_onQuit else " Sauvegarde des listes déroulantes Activée"
+        self.backup_bar.update_vltexte(msg, int(self.__saveItemsList_onQuit))
 
     def __update_backupStateBar(self, itemtype:ITEMSTYPE, mode:int):
         """ Méthode de mise à jour du message de la 'backup_StateBar' qui 
@@ -1059,23 +1091,15 @@ class Application(tk.Tk):
         """
         str_items = ", ".join([item for item in self.items_dico.keys() if self.cbox_textvariable_dico[item].get()])
         if self.__saveItemsList_onQuit:
-            self.backup_bar.update_vltexte(f" Sauvegarde de: {str_items}",1)
-
-    def __get_ItemFromCboxName(self, comboboxName:str) -> ITEMSTYPE:
-        """ Méthode qui renvoi le nom de type ITEMSTYPE d'après le 'ttk.Combobox._name'
-            passé en paramètre 
-            Paramètre:
-                comboboxname : attribut '_name' d'une ttk.Combobox 
-        """
-        Items_dico:dict = {"effets":"Effets","races":"Races","elements":"Eléments","talents":"Talents"}
-        return Items_dico.get(sub(r'!|Combobox',"",comboboxName).strip(), None)
+            msg = f" Sauvegarde de: {str_items}" if str_items else " Sauvegarde des listes déroulantes Activée"
+            self.backup_bar.update_vltexte(msg, 1)
         
     def __update_ComboboxState(self, itemtype:ITEMSTYPE|None=None):
-        """ Méthode qui change le status des tk.Combobox() pour pouvoir ajouter
-            des items à la liste des 'values' du widget. et mise à jour du
+        """ Méthode qui change le status des tk.Combobox() pour pouvoir ajouter/supprimer
+            des items à la liste 'values' du widget. et mise à jour du
             message de la 'backup_StateBar'.
         """
-        self.get_combobox(itemtype).configure(state="normal" \
+        self.__get_ComboboxFromItem(itemtype).configure(state="normal" \
                             if self.cbox_textvariable_dico[itemtype].get()==1 else "readonly")  
         self.__update_backupStateBar(itemtype, self.cbox_textvariable_dico[itemtype].get())    
 
@@ -1089,7 +1113,7 @@ class Application(tk.Tk):
             if all([item, self.cbox_textvariable_dico.get(item, False).get()]):
                 values = list(w.cget('values'))
                 if w.select_present() and w.selection_get() == values[w.current()]:
-                    print(f"\tw.selection_get(): {w.selection_get()}\n\tvalues[w.current(): {values[w.current()]}")
+                    #print(f"\tw.selection_get(): {w.selection_get()}\n\tvalues[w.current(): {values[w.current()]}")
                     values.pop(w.current())
                     w.configure(values=values)
             else:
@@ -1118,13 +1142,14 @@ class Application(tk.Tk):
             'self.__saveItemsList_onQuit' est sur 'True' et si la variable 
             de controle de l'item est à 1 (True). 
         """
+        self.backup_bar.update_vltexte(" Sauvgarde en cours ...")
         for item in self.typeItems_Dico:
             # ---- comparaisons des variables des tk.Checkbox() de backup -----
             if bool(self.cbox_textvariable_dico[item].get()):
                 # ------ génération du nom de fichier fonction de l'item ------
                 filename = osp.join("./","coreDataDB","".join([c.lower().replace('é','e') for c in item]))
                 # ------ recherche des 'values' de la combobox de l'item ------
-                items_list = list(self.get_combobox(item).cget('values'))
+                items_list = list(self.__get_ComboboxFromItem(item).cget('values'))
                 # --- Ecriture du fichier 'Items' avec les nouvelle valeurs ---               
                 with open(filename, mode="w", encoding='utf-8') as itemfile:
                     itemfile.writelines(f"{line}\n" for line in items_list)
@@ -1139,7 +1164,7 @@ class Application(tk.Tk):
         """ Fenêtre-message à propos.
             Indique le nom du/des auteurs ainsi que la/les licences.
         """
-        message = "CARDDB GUI v1.5"+"\n\nCopyright (C) 2026\nBernard Amouroux" \
+        message = "CardDB-GUI v1.2"+"\n\nCopyright (C) 2026\nBernard Amouroux" \
         "\nLicense : GPL Version 3, 29 June 2007\n" \
         "\nMoteur du support de création des cartes"+"\nJan Amouroux" \
         "\nLicense : GPL Version 3, 29 June 2007\n" \
@@ -1150,9 +1175,8 @@ class Application(tk.Tk):
     
     def Quit(self):
         if self.__saveItemsList_onQuit:
-            self.backup_bar.update_vltexte(" Sauvgarde en cours ...")
-            self.__backup_etea_list()    
             self.after(1000, self.destroy)
+            self.__backup_etea_list()    
         else:
             self.destroy()    
         
@@ -1171,6 +1195,6 @@ if __name__ == "__main__":
         icon = tk.PhotoImage(master=app, file=osp.join(os.getcwd(),'imgsDataDB','carddb.png'))
         app.wm_iconphoto(True, icon)
     # -------------------------------------------------------------------------
-    app.title("CARDDB GUI v1.5 (c)2026 AMOUROUX Bernard - GUI de saisie des cartes de CARDDB (c)2026 AMOUROUX Jan")
+    app.title("CardDB-GUI v1.2 (c)2026 AMOUROUX Bernard - GUI de saisie des cartes de CARDDB (c)2026 AMOUROUX Jan")
     app.mainloop()
         
