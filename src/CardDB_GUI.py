@@ -395,6 +395,7 @@ class Application(tk.Tk):
         self.bind("<F11>",self.__toggle_fullscreen)
         self.bind("<Alt-F1>", self.fenetre_a_propos)
         self.bind("<Escape>", self.__exit_fullscreen)
+        self.bind("<Control-F1>", self.__contextualHelp)
         self.bind_class(self, "<<PopupMenu>>", self.cardDBMenu.show_Menu_Popup)
         self.columnconfigure(list(range(20)), minsize=40, weight=1)
         self.columnconfigure(index=[20,21], minsize=90, weight=1)
@@ -471,7 +472,8 @@ class Application(tk.Tk):
         """ Création de tous les widgets de la fenètre principale
             Configuration et affichage/masquage des widgets en dynamique (gestion des évènements)
         """
-        globalframe = My_LabelFrame(self,cspan=20,rspan=9,pad=(2,2,2,2),name="!globalFrame",sticky="nsew")
+        self.globalframe = My_LabelFrame(self,cspan=20,rspan=9,pad=(2,2,2,2),name="!globalFrame",sticky="nsew")
+        globalColor = self.globalframe.cget('bg')
         # --- Création du tk.Canvas() pour affichage de l'image de la carte ---
         imageframe = My_LabelFrame(self,col=20,cspan=2,rspan=9,bg='wheat',pad=(2,2,2,2),sticky="new")
         self.cardDBcanvas = tk.Canvas(imageframe, bd=3, relief='ridge', bg='ivory2', 
@@ -481,7 +483,7 @@ class Application(tk.Tk):
                                                         state="normal",anchor="nw",tags='img_default')
         self.cardDBcanvas.grid(column=0,row=0,columnspan=2,rowspan=9,sticky='new')
         # ----- Création visuel pour affichage des elements,races,effets ------
-        titleframe = My_LabelFrame(globalframe,col=2,row=0,cspan=16,bg="#FBE6C8",
+        titleframe = My_LabelFrame(self.globalframe,col=2,row=0,cspan=16,bg="#FBE6C8",
                                                         pad=(2,2,0,0),name="!titleFrame",sticky="ew")
         tk.Label(titleframe,textvariable=self.vmastertitle,bg=titleframe.cget('bg'),
                                       font=self.ttlfont).grid(column=0,row=0,columnspan=8,sticky="new")
@@ -493,8 +495,8 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         # ------- frame des attributs communs à toutes les carte CardDB -------
         # ---------------------------------------------------------------------
-        self.frameCardDB = My_LabelFrame(globalframe,col=0,row=1,cspan=20,rspan=2,bg=globalframe.cget('bg'),
-                                          name="!frameCardDB",pad=(2,0,0,0),bd=2,relief="groove",sticky="new")
+        self.frameCardDB = My_LabelFrame(self.globalframe,col=0,row=1,cspan=20,bg=globalColor,
+                                    rspan=2,name="!cardDBFrame",pad=(2,0,0,0),bd=2,relief="groove",sticky="new")
         tk.Label(self.frameCardDB,bg=self.frameCardDB.cget('bg'),textvariable=self.vlabelname,
                             anchor="w",font=self.itemfont).grid(row=0,column=0,columnspan=4,pady=4,sticky="nw")
         tk.Entry(self.frameCardDB,bg='ivory',textvariable=self.vname,
@@ -509,9 +511,9 @@ class Application(tk.Tk):
                         name="!labelCost",font=self.itemfont).grid(row=1,column=0,columnspan=2,pady=4,sticky="nw")
         tk.Entry(self.frameCardDB,bg='ivory',textvariable=self.vcost,width=3,
                         name="!entryCost",font=self.itemfont).grid(column=2,row=1,columnspan=1,pady=4,sticky="nw")
-        self.curencyCombobox = ttk.Combobox(self.frameCardDB,background=globalframe.cget('bg'),width=10,
-                                            font=self.itemfont,postcommand=None,values=self.curencytypelist,
-                                                state="readonly",name="!comboboxCost",textvariable=self.vcurencytype)
+        self.curencyCombobox = ttk.Combobox(self.frameCardDB,background=globalColor,width=10,
+                                                 font=self.itemfont,postcommand=None,values=self.curencytypelist,
+                                                   state="readonly",name="!comboboxCost",textvariable=self.vcurencytype)
         self.curencyCombobox.grid(column=3,row=1,columnspan=4,padx=5,pady=4,sticky="new")
         tk.Label(self.frameCardDB,text=" Image carte :",bg=self.frameCardDB.cget('bg'),
                                font=self.itemfont).grid(row=1,column=9,columnspan=2,padx=5,pady=4,sticky="nw")
@@ -522,12 +524,12 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         # ---------------------------------------------------------------------
         texte = " Données des Armes, Talents et Eléments "
-        frametalents = My_LabelFrame(globalframe,col=10,row=3,cspan=10,rspan=4,bg=globalframe.cget('bg'),
-                                text=texte,font=self.lblfont,pad=(0,0,0,4),bd=2,relief="ridge",sticky="new") 
+        frametalents = My_LabelFrame(self.globalframe,col=10,row=3,cspan=10,rspan=4,bd=2,bg=globalColor,
+                         text=texte,font=self.lblfont,pad=(0,0,0,4),relief="ridge",name="!artaelFrame",sticky="new") 
         # ---------------------------------------------------------------------
         tk.Label(frametalents,text=" Talent         : ",bg=frametalents.cget('bg'),
                                font=self.itemfont).grid(row=0,column=0,columnspan=2,pady=4,sticky="nw")
-        self.talentsCombobox = ttk.Combobox(frametalents,background=globalframe.cget('bg'),
+        self.talentsCombobox = ttk.Combobox(frametalents,background=globalColor,
                                  font=self.itemfont,state="readonly",name="!talentsCombobox",width=10,
                                    postcommand=None,values=self.talentstypelist,textvariable=self.vtalentstype)
         self.talentsCombobox.grid(column=2,row=0,columnspan=8,padx=2,pady=4,sticky="new")
@@ -536,31 +538,33 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         tk.Label(frametalents,text=" Arme équipable : ",bg=frametalents.cget('bg'),
                                font=self.itemfont).grid(row=1,column=0,columnspan=2,pady=0,sticky="nw")
-        self.armesCombobox = ttk.Combobox(frametalents,background=globalframe.cget('bg'),
+        self.armesCombobox = ttk.Combobox(frametalents,background=globalColor,
                                             font=self.itemfont,postcommand=None,values=list(self.armeslist),
                                                 state="readonly",name="!armesCombobox",textvariable=self.varmes)
         self.armesCombobox.grid(column=2,row=1,columnspan=8,padx=2,pady=0,sticky="new")
         # ---------------------------------------------------------------------
         tk.Label(frametalents,text=" Eléments :",bg=frametalents.cget('bg'),
                                font=self.itemfont).grid(row=2,column=0,columnspan=3,pady=4,rowspan=2,sticky="w")
-        self.elementsCombobox = ttk.Combobox(frametalents,background=globalframe.cget('bg'),width=14,
+        self.elementsCombobox = ttk.Combobox(frametalents,background=globalColor,width=14,
                                   postcommand=None,values=list(self.elementstypelist),font=self.itemfont,
                                     state="readonly",name="!elementsCombobox",textvariable=self.velementstype)
         self.elementsCombobox.grid(column=1,row=2,columnspan=5,padx=2,pady=4,rowspan=2,sticky="e")
         self.elementsCombobox.bind("<<ComboboxAddItem>>",self.__update_comboboxValues)
         self.elementsCombobox.bind("<<ComboboxDelItem>>",self.__delete_comboboxValues)
-        tk.Button(frametalents,compound="center",image=self.button_add,height=32,width=32,
-                                 command=lambda: self.__add_items__("Eléments")).grid(column=6,
-                                                         row=2,padx=0,pady=3,columnspan=2,rowspan=2,sticky="w")
-        tk.Button(frametalents,compound="center",image=self.button_suppr,height=32,width=32,
-                                    command=lambda :self.__del_items__("Eléments")).grid(column=7,
-                                                         row=2,padx=0,pady=3,columnspan=2,rowspan=2,sticky="e")
-        tk.Button(frametalents,compound="center",image=self.button_liste,height=32,width=32,
-                                    command=lambda :self.__list_items__("Eléments",False)).grid(column=9,
-                                                         row=2,padx=2,pady=3,columnspan=2,rowspan=2,sticky="e")
+        frame3Btn = My_LabelFrame(frametalents,bg=frametalents.cget('bg'),col=6,row=2,
+                                                              cspan=4,rspan=2,name="!3btnElements",sticky="ew")
+        tk.Button(frame3Btn,compound="center",image=self.button_add,height=32,width=32,
+                                 command=lambda: self.__add_items__("Eléments")).grid(column=0,
+                                                         row=0,padx=2,pady=0,columnspan=1,rowspan=2,sticky="w")
+        tk.Button(frame3Btn,compound="center",image=self.button_suppr,height=32,width=32,
+                                    command=lambda :self.__del_items__("Eléments")).grid(column=1,
+                                                         row=0,padx=0,pady=0,columnspan=1,rowspan=2,sticky="w")
+        tk.Button(frame3Btn,compound="center",image=self.button_liste,height=32,width=32,
+                                    command=lambda :self.__list_items__("Eléments",False)).grid(column=2,
+                                                         row=0,padx=2,pady=0,columnspan=1,rowspan=2,sticky="e")
         # ---------------------------------------------------------------------
         self.frameBackuplistes = My_LabelFrame(frametalents,bd=1,col=0,row=4,bg='wheat',
-                                                                   cspan=10,relief="sunken",pad=(0,0,3,2))                               
+                                                 name="!backupListFrame",cspan=10,relief="sunken",pad=(0,0,3,2))                               
         tk.Label(self.frameBackuplistes,text=" Modifier les :",bg=self.frameBackuplistes.cget('bg'),
                                 font=('Consolas 8 bold italic')).grid(column=0,row=0,sticky="nsew")
         tk.Checkbutton(self.frameBackuplistes,variable=self.vbackupEffets,text="Effets",
@@ -577,8 +581,8 @@ class Application(tk.Tk):
                       bg=self.frameBackuplistes.cget('bg'),state="disabled").grid(column=7,row=0,sticky="nsew")
         # ---------------------------------------------------------------------
         texte = " Données statistiques de combat "
-        frameproperty = My_LabelFrame(globalframe,col=0,row=3,cspan=10,rspan=4,bd=2,bg=globalframe.cget('bg'),
-                                               font=self.lblfont,text=texte,pad=(0,0,0,3),relief="ridge",sticky="new")  
+        frameproperty = My_LabelFrame(self.globalframe,col=0,row=3,cspan=10,rspan=4,bd=2,bg=globalColor,
+                                               name="!fightDataFrame",font=self.lblfont,text=texte,pad=(0,0,0,3),relief="ridge",sticky="new")  
         tk.Label(frameproperty,text=" Points de vie    : ",bg=frameproperty.cget('bg'),
                                font=self.itemfont).grid(row=0,column=0,columnspan=4,pady=0,sticky="nw")
         tk.Entry(frameproperty,bg='ivory',textvariable=self.vhp,width=3,
@@ -603,32 +607,34 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         tk.Label(frameproperty,text=" Ciblage     : ",bg=frameproperty.cget('bg'),
                                font=self.itemfont).grid(row=2,column=5,columnspan=2,pady=0,sticky="nw")
-        self.targetCombobox = ttk.Combobox(frameproperty,background=globalframe.cget('bg'),width=10,
+        self.targetCombobox = ttk.Combobox(frameproperty,background=globalColor,width=10,
                                             font=self.itemfont,postcommand=None,values=list(self.typetargetlist),
                                                 state="readonly",name="!targetCombobox",textvariable=self.vtypetarget)
         self.targetCombobox.grid(column=7,row=2,columnspan=3,padx=2,pady=3,sticky="nw")
         # ---------------------------------------------------------------------
         tk.Label(frameproperty,text=f" {'Effets':<17}: ",bg=frameproperty.cget('bg'),
                                font=self.itemfont).grid(row=3,column=0,columnspan=4,pady=3,sticky="w")
-        self.effetsCombobox = ttk.Combobox(frameproperty,background=globalframe.cget('bg'),width=10,
+        self.effetsCombobox = ttk.Combobox(frameproperty,background=globalColor,width=10,
                                        postcommand=None,values=list(self.typeffetlist),font=self.itemfont,
                                             state="readonly",name="!effetsCombobox",textvariable=self.veffects)
         self.effetsCombobox.bind("<<ComboboxAddItem>>",self.__update_comboboxValues)
         self.effetsCombobox.bind("<<ComboboxDelItem>>",self.__delete_comboboxValues)
         self.effetsCombobox.grid(column=4,row=3,columnspan=3,pady=3,sticky="ew")
-        tk.Button(frameproperty,compound="center",image=self.button_add,height=32,width=32,
-                                      command=lambda :self.__add_items__("Effets")).grid(column=7,
-                                                        row=3,padx=3,pady=3,columnspan=2,sticky="nsw")
-        tk.Button(frameproperty,compound="center",image=self.button_suppr,height=32,width=32,
-                                       command=lambda :self.__del_items__("Effets")).grid(column=7,
-                                                            row=3,padx=0,pady=3,columnspan=3,sticky="ns")
-        tk.Button(frameproperty,compound="center",image=self.button_liste,height=32,width=32,
-                                    command=lambda :self.__list_items__("Effets",False)).grid(column=8,
-                                                               row=3,padx=3,pady=3,columnspan=2,sticky="nse")
+        frame3Btn = My_LabelFrame(frameproperty,bg=frametalents.cget('bg'),col=7,row=3,
+                                                              cspan=4,rspan=2,name="!3btnEffets",sticky="ew")
+        tk.Button(frame3Btn,compound="center",image=self.button_add,height=32,width=32,
+                                      command=lambda :self.__add_items__("Effets")).grid(column=0,
+                                                        row=0,padx=0,pady=0,columnspan=2,sticky="w")
+        tk.Button(frame3Btn,compound="center",image=self.button_suppr,height=32,width=32,
+                                       command=lambda :self.__del_items__("Effets")).grid(column=1,
+                                                            row=0,padx=2,pady=0,columnspan=2,sticky="n")
+        tk.Button(frame3Btn,compound="center",image=self.button_liste,height=32,width=32,
+                                    command=lambda :self.__list_items__("Effets",False)).grid(column=2,
+                                                               row=0,padx=0,pady=0,columnspan=2,sticky="e")
         # ---------------------------------------------------------------------
         # ----------- frame des attributs spécifiques à Equipement ------------
         # ---------------------------------------------------------------------
-        self.equipementFrame = My_LabelFrame(globalframe,col=0,row=7,cspan=20,rspan=2,
+        self.equipementFrame = My_LabelFrame(self.globalframe,col=0,row=7,cspan=20,rspan=2,
                                                                   bg="#E9FAD8",name="!equipementFrame",sticky="sew")
         # ---------------------------------------------------------------------
         tk.Label(self.equipementFrame,anchor="w",bg=self.equipementFrame.cget('bg'),text=" Mode de défense :",
@@ -655,45 +661,33 @@ class Application(tk.Tk):
         self.racesEquipCombobox.grid(column=10,row=0,columnspan=7,rowspan=2,pady=2,sticky="w")
         self.racesEquipCombobox.bind("<<ComboboxAddItem>>",self.__update_comboboxValues)
         self.racesEquipCombobox.bind("<<ComboboxDelItem>>",self.__delete_comboboxValues)
-        tk.Button(self.equipementFrame,compound="center",image=self.button_add,height=32,width=32,
-                                           command=lambda: self.__add_items__("Races")).grid(column=17,
-                                                                    row=0,padx=3,pady=3,rowspan=2,sticky="w")
-        tk.Button(self.equipementFrame,compound="center",image=self.button_suppr,height=32,width=32,
-                                             command=lambda :self.__del_items__("Races")).grid(column=18,
-                                                                    row=0,padx=0,pady=3,rowspan=2,sticky="w")
-        tk.Button(self.equipementFrame,compound="center",image=self.button_liste,height=32,width=32,
-                                       command=lambda: self.__list_items__("Races", False)).grid(column=19,
-                                                                    row=0,padx=3,pady=3,rowspan=2,sticky="w")
+        frame3Btn = My_LabelFrame(self.equipementFrame,bg=self.equipementFrame.cget('bg'),col=17,row=0,
+                                                              cspan=3,rspan=2,name="!3btnRaces",sticky="ew")
+        tk.Button(frame3Btn,compound="center",image=self.button_add,height=32,width=32,
+                                           command=lambda: self.__add_items__("Races")).grid(column=0,
+                                                                    row=0,padx=0,pady=0,rowspan=2,sticky="w")
+        tk.Button(frame3Btn,compound="center",image=self.button_suppr,height=32,width=32,
+                                             command=lambda :self.__del_items__("Races")).grid(column=2,
+                                                                    row=0,padx=2,pady=0,rowspan=2,sticky="n")
+        tk.Button(frame3Btn,compound="center",image=self.button_liste,height=32,width=32,
+                                       command=lambda: self.__list_items__("Races", False)).grid(column=3,
+                                                                    row=0,padx=0,pady=0,rowspan=2,sticky="e")
         # ---------------------------------------------------------------------
         # -------------- frame des attributs spécifiques à Sort ---------------
         # ---------------------------------------------------------------------
-        self.spellFrame = My_LabelFrame(globalframe,col=0,row=7,cspan=20,rspan=2,bg="#D8E6FA",name="!spellFrame",sticky="sew")
+        self.spellFrame = My_LabelFrame(self.globalframe,col=0,row=7,cspan=20,rspan=2,bg="#D8E6FA",name="!spellFrame",sticky="sew")
         tk.Label(self.spellFrame,anchor="center",bg=self.spellFrame.cget('bg'),text=f"{' Type de sort :':>20}",
                                               font=self.itemfont).grid(row=0,column=0,columnspan=2,pady=14,sticky="w")
         self.spellCombobox = ttk.Combobox(self.spellFrame,background=self.spellFrame.cget('bg'),
                                         font=self.itemfont,postcommand=None,values=self.typesortlist,
                                              state="readonly",name="!spellCombobox",textvariable=self.vtypesort)
         self.spellCombobox.grid(column=2,row=0,columnspan=4,pady=14,sticky="w")
-        """
-        # ------------ frame des attributs spécifiques au terrain -------------
-        self.terrainFrame = My_LabelFrame(globalframe,col=0,row=6,cspan=20,rspan=2,bg="#F3D6B6",name="!terrainFrame",sticky="sew")
-        tk.Label(self.terrainFrame,anchor="center",bg=self.terrainFrame.cget('bg'),text=f"{' Type d\'effet :':>20}",
-                                              font=self.itemfont).grid(row=0,column=0,columnspan=2,pady=14,sticky="w")
-        self.terrainCombobox = ttk.Combobox(self.terrainFrame,background=self.terrainFrame.cget('bg'),
-                                            font=self.itemfont,postcommand=None,values=self.typeffetlist,
-                                              state="readonly",name="!terrainCombobox",textvariable=self.veffects)
-        self.terrainCombobox.grid(column=2,row=0,columnspan=4,pady=14,sticky="w")
-        tk.Button(self.terrainFrame,text="Ajouter/Visualiser la liste des effets",font=self.lblfont,
-                                command=self.__add_effect).grid(column=6,row=0,columnspan=14,padx=3,pady=14,sticky="ew")
-        """
         # ----------------- frame boutons save/default/cancel -----------------
-        buttonsFrame = My_LabelFrame(self,col=0,row=9,cspan=22,pad=(2,0,0,3))
+        buttonsFrame = My_LabelFrame(self,col=0,row=9,cspan=22,name="!systemBtnFrame",pad=(2,0,0,3))
         tk.Button(buttonsFrame,text=" RàZ Défaut ",bg="#FDEED0",command=self.__raz_default,
                                             font=self.frmfont).grid(column=2,row=0,columnspan=3,sticky="ew")
-        
         tk.Button(buttonsFrame,text=" Charger/Modifier ",bg="#D0E9FD",command=self.load_CARDDB_file,
                                             font=self.frmfont).grid(column=8,row=0,columnspan=2,sticky="ew")        
-        
         tk.Button(buttonsFrame,bg="#C9FFD3",font=self.frmfont,command=self.__save_CARDDB_card,
                                 text=" Enregistrer la carte ").grid(column=13,row=0,columnspan=2,sticky="ew")
         tk.Button(buttonsFrame,text=" Annuler/Quitter ",command=self.Quit,bg="#FCC6C6",
@@ -707,6 +701,35 @@ class Application(tk.Tk):
 
     def __show_wholeHelp(self, event:tk.Event=None):
         self.cardDBhelp.show_whole_help()
+
+    def __contextualHelp(self, event:tk.Event=None):
+        if event and event.widget == self:
+            x, y = event.x_root, event.y_root
+            w_name = f"{self.winfo_containing(x, y)}"
+            print(f"__itemHelp(widget): {self.winfo_containing(x, y)}")
+            if "!titleFrame" in w_name:
+                self.cardDBhelp.show_paragraph(f"{2.1}", state="disabled")
+            elif "!cardDBFrame" in w_name:
+                self.cardDBhelp.show_paragraph(f"{2.2}", state="disabled")
+            elif "!3btn" in w_name:
+                self.cardDBhelp.show_paragraph(f"{2.6}", state="disabled")
+            elif "!fightDataFrame" in w_name:
+                self.cardDBhelp.show_paragraph(f"{2.3}", state="disabled")
+            elif "!backupListFrame" in w_name:
+                self.cardDBhelp.show_paragraph(f"{3.2}", state="disabled")
+            elif "!artaelFrame" in w_name:
+                self.cardDBhelp.show_paragraph(f"{2.4}", state="disabled")
+            elif any(name in w_name for name in ["!equipementFrame","spellFrame"]):
+                self.cardDBhelp.show_paragraph(f"{2.5}", state="disabled")
+            elif "!systemBtnFrame" in w_name:
+                self.cardDBhelp.show_paragraph(f"{1.4}", state="disabled")
+            elif "!windows_statebar" in w_name:
+                self.cardDBhelp.show_paragraph(f"{1.5}", state="disabled")  
+            elif "!cardDBcanvas" in w_name:
+                self.cardDBhelp.show_paragraph(f"{1.6}", state="disabled")  
+            else:
+                self.cardDBhelp.show_whole_help()   
+                    
 
     def select_imageFile(self) -> str:
         title = "Choix du fichier Image"

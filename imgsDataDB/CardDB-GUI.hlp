@@ -20,7 +20,7 @@
         'Aide de CardDB-GUI'            : F1 ouvre la fenêtre d'aide que vous êtes en train de consulter ...
         'Quitter CardDB-GUI'            : Fermer l'application et enregistre les Listes Modifiables si l'option est à 'On'. Raccourci 'Alt-F4'
         EOP
-
+        
     -1.4__Les Boutons de CardDB-GUI:    
         L'application possède quatre boutons système qui sont :    
         'RàZ Défaut'           : pour reinitialiser les champs à leurs valeurs par défaut.
@@ -32,6 +32,11 @@
     -1.5__Les Barres d'état de CardDB-GUI:    
         Deux barre d'état pour deux infos différentes. Celle de gauche indique comment obtenir le menu contextuel, l'Aide et les messages d'erreurs de création des cartes.
         Celle de droite affiche l'activation ou non de la sauvegarde des listes modifiables et celles qui vont l'être.
+        EOP
+
+    -1.6__Image illustrant les cartes:    
+        Cette fenêtre sera la représentation illustrée de la carte qui va être créée. Elle est chargée grace au bouton 'Choisir Image' qui permet de rechercher un fichier image de tout type (BMP, JPG, GIF, TIFF etc...).
+        Une fois le choix de l'image validé, elle est affichée puis enregistrée sous un nouveau nom de fichier dans le dossier des images de CardDB-GUI. 
         EOP
 
 -2__Création/Modification des cartes CardDB:    EOP

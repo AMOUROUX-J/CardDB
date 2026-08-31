@@ -228,8 +228,8 @@ class Help_System(tk.Toplevel):
         self.__helpText.tag_configure("title", font=self.lblFont, background="DarkOliveGreen1")
         self.__helpText.tag_configure("txtle", font=('Consolas 12 bold italic'))
         self.__helpText.grid(column=2, row=1, columnspan=8, sticky="nsew")
-        self.state_bar = Help_StateBar(self,0,2,cspan=10,pady=3,txtfont=self.btnFont,sticky="nsew",
-                           bg='wheat',defMessage=" Aide info : Touche 'Echap' pour fermer la fenètre.", defTime=5)
+        self.state_bar = Help_StateBar(self,0,2,cspan=10,pady=3,txtfont=self.txtFont,sticky="nsew", bg='wheat',
+            defMessage=" Info : F1 pour l'aide complet, Ctrl-F1 pour l'aide contextuel, 'Echap' ferme la fenètre.", defTime=5)
         self.bind("<<ListboxSelect>>", self.on_paragraph_select)
     
     def on_paragraph_select(self, event):
@@ -240,7 +240,8 @@ class Help_System(tk.Toplevel):
             index = self.__helpText.search(f"{number}", "1.0", tk.END)
             self.__helpText.see(index=index)
     
-    def show_paragraph(self, number:float):
+    def show_paragraph(self, number:float, state="normal"):
+        if state != "normal": self.__helpList.configure(state=state)
         paragraph = self.paragraphes.get_paragraph(number)
         if paragraph.isTitle:
             self.__helpText.insert(tk.END, f"{int(paragraph.numero)}"+' - '+paragraph.title+'\n', (f"paragraph_{number}", "title_nbr"))
@@ -266,6 +267,8 @@ class Help_System(tk.Toplevel):
         self.wm_deiconify()
     
     def show_whole_help(self):
+        self.delete_text()
+        self.__helpList.configure(state="normal")
         [self.show_paragraph(number) for number in self.paragraphes.all_paragraph]
         self.title_bar.update_vltexte(f"  Aide de CardDB-GUI v1.2 ",1)
         self.__helpText.configure(state='disabled')
@@ -305,8 +308,8 @@ if __name__ == "__main__":
     #print(helper.paragraphes.get_paragraph("2.1"))
     #[print(item.__str__()) for key,item in helper.paragraphes.all_paragraph.items()]
     
-    #helper.show_paragraph("2.2")
+    helper.show_paragraph("2.3", state="disabled")
     #helper.show_strait_help()
-    helper.show_whole_help()
+    #helper.show_whole_help()
     root.mainloop()
     root.quit()
