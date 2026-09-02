@@ -1,6 +1,6 @@
 # -- encode utf-8 --
 """
-CardDB-GUI v1.2 - Une étude Python POO pour la saisie des données des types de cartes 
+CardDB-GUI v1.5 - Une étude Python POO pour la saisie des données des types de cartes 
 'creature', 'equipement' et 'spell' du jeu CARDDB en mode graphique (TKinter).
 Copyright (c) 2026 Jan AMOUROUX - étude moteur du jeu pour la création des cartes. 
 Copyright (C) 2026 Bernard AMOUROUX - étude Tkinter
@@ -31,7 +31,6 @@ __date__ = "$Date: 2026/08/01 07:00 $"
 __copyright__ = "Copyright (c) 2026 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
-#import re
 import locale
 import os, sys
 import tkinter as tk
@@ -51,6 +50,7 @@ from cardDB_HLP import Help_System
 from CreatureCard import Creature
 from cardLogics import readRules
 from tkinter.font import Font
+from re import sub
 
 ITEMSTYPE = Literal["Effets","Eléments","Races","Talents"]
 itemstypeList = get_args(ITEMSTYPE)
@@ -365,7 +365,7 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         self.MessageBox = Win_MessageBox(self, msgtext=('Courier New', 14, 'normal', 'italic'))  
         self.state_bar = Window_StateBar(self,"",0,0,10,cspan=18,bg='tan',pady=3,txtfont=self.lblfont)                                         
-        self.state_bar.message = " Info : 'Clic-Droit' ou 'Ctrl-M' pour le menu contextuel, F1 aide de CardDB-GUI v1.2"
+        self.state_bar.message = " Info : 'Clic-Droit' ou 'Ctrl-M' pour le menu contextuel, F1 Aide global, Ctrl-F1 Aide contextuel de CardDB-GUI v1.5"
         self.backup_bar = Window_StateBar(self,"",0,18,10,cspan=4,bg='wheat',pady=3,txtfont=self.lblfont)
         self.backup_bar.message = " Info : Aucune liste déroulante sauvegardée "
         self.cardDBhelp = Help_System(self)
@@ -389,7 +389,7 @@ class Application(tk.Tk):
                         (" Aide de CardDB-GUI","F1",self.__show_wholeHelp),
                         ("separator","",None),
                         (" Quitter CardDB-GUI ","Alt-F4 ",self.Quit)]
-        self.cardDBMenu = PopupMenu(self, "        CardDB-GUI v1.2, PopupMenu", commandsList, nosel=[])
+        self.cardDBMenu = PopupMenu(self, "        CardDB-GUI v1.5, PopupMenu", commandsList, nosel=[])
         # ---------------------------------------------------------------------
         self.bind('<F1>', self.__show_wholeHelp)
         self.bind("<F11>",self.__toggle_fullscreen)
@@ -477,7 +477,7 @@ class Application(tk.Tk):
         # --- Création du tk.Canvas() pour affichage de l'image de la carte ---
         imageframe = My_LabelFrame(self,col=20,cspan=2,rspan=9,bg='wheat',pad=(2,2,2,2),sticky="new")
         self.cardDBcanvas = tk.Canvas(imageframe, bd=3, relief='ridge', bg='ivory2', 
-                                                            width=200,height=320,name="!cardDBcanvas")
+                                                            width=210,height=340,name="!cardDBcanvas")
         self.cardImage = self.preload_cardDB_Image("placeholder.png")
         self.cardDB_image = self.cardDBcanvas.create_image(+7,+5, image=self.cardImage, 
                                                         state="normal",anchor="nw",tags='img_default')
@@ -703,34 +703,34 @@ class Application(tk.Tk):
         self.cardDBhelp.show_whole_help()
 
     def __contextualHelp(self, event:tk.Event=None):
-        if event and event.widget == self:
+        if event and event.widget != None:
             x, y = event.x_root, event.y_root
             w_name = f"{self.winfo_containing(x, y)}"
-            print(f"__itemHelp(widget): {self.winfo_containing(x, y)}")
+            #print(f"__itemHelp(widget): {self.winfo_containing(x, y)}")
             if "!titleFrame" in w_name:
-                self.cardDBhelp.show_paragraph(f"{2.1}", state="disabled")
+                paragraph = 2.1
             elif "!cardDBFrame" in w_name:
-                self.cardDBhelp.show_paragraph(f"{2.2}", state="disabled")
+                paragraph = 2.2
             elif "!3btn" in w_name:
-                self.cardDBhelp.show_paragraph(f"{2.6}", state="disabled")
+                paragraph = 2.6
             elif "!fightDataFrame" in w_name:
-                self.cardDBhelp.show_paragraph(f"{2.3}", state="disabled")
+                paragraph = 2.3
             elif "!backupListFrame" in w_name:
-                self.cardDBhelp.show_paragraph(f"{3.2}", state="disabled")
+                paragraph = 3.2
             elif "!artaelFrame" in w_name:
-                self.cardDBhelp.show_paragraph(f"{2.4}", state="disabled")
+                paragraph = 2.4
             elif any(name in w_name for name in ["!equipementFrame","spellFrame"]):
-                self.cardDBhelp.show_paragraph(f"{2.5}", state="disabled")
+                paragraph = 2.5
             elif "!systemBtnFrame" in w_name:
-                self.cardDBhelp.show_paragraph(f"{1.4}", state="disabled")
-            elif "!windows_statebar" in w_name:
-                self.cardDBhelp.show_paragraph(f"{1.5}", state="disabled")  
+                paragraph = 1.4
+            elif "!window_statebar" in w_name:
+                paragraph = 1.5
             elif "!cardDBcanvas" in w_name:
-                self.cardDBhelp.show_paragraph(f"{1.6}", state="disabled")  
+                paragraph = 1.6
             else:
-                self.cardDBhelp.show_whole_help()   
+                paragraph = -1
+        self.cardDBhelp.show_paragraph(f"{paragraph}", state="disabled") if paragraph > 0 else self.cardDBhelp.show_whole_help()
                     
-
     def select_imageFile(self) -> str:
         title = "Choix du fichier Image"
         files = os.listdir(Card.ImageOutPath)
@@ -759,7 +759,7 @@ class Application(tk.Tk):
         defaultfilename = osp.join(os.getcwd(),Card.ImageOutPath,"placeholder.png")
         # ---------------------------------------------------------------------
         image = Image.open(fp=filename if osp.isfile(filename) else defaultfilename, mode='r')
-        return ImageTk.PhotoImage(image.resize((200,320), Image.Resampling.LANCZOS), master=self)
+        return ImageTk.PhotoImage(image.resize((210,340), Image.Resampling.LANCZOS), master=self)
         
     def __valide_armequipement(self, event:tk.Event=None):
         combo_dico:dict = {"armure":"disabled"}
@@ -931,8 +931,6 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         cardtype = self.__raz_default(cardtype=cardDB.cardType)
         self.vname.set(cardDB.name)
-        #self.vcardtype.set(cardtype)
-        #if self.vcardtype.get() != "terrain":
         if cardtype != "terrain":
             self.vcost.set(cardDB.cost)
             self.vraces.set('None') if cardDB.cardType != 'creature' else cardDB.race
@@ -1187,7 +1185,7 @@ class Application(tk.Tk):
         """ Fenêtre-message à propos.
             Indique le nom du/des auteurs ainsi que la/les licences.
         """
-        message = "CardDB-GUI v1.2"+"\n\nCopyright (C) 2026\nBernard Amouroux" \
+        message = "CardDB-GUI v1.5"+"\n\nCopyright (C) 2026\nBernard Amouroux" \
         "\nLicense : GPL Version 3, 29 June 2007\n" \
         "\nMoteur du support de création des cartes"+"\nJan Amouroux" \
         "\nLicense : GPL Version 3, 29 June 2007\n" \
@@ -1218,6 +1216,6 @@ if __name__ == "__main__":
         icon = tk.PhotoImage(master=app, file=osp.join(os.getcwd(),'imgsDataDB','carddb.png'))
         app.wm_iconphoto(True, icon)
     # -------------------------------------------------------------------------
-    app.title("CardDB-GUI v1.2 (c)2026 AMOUROUX Bernard - GUI de saisie des cartes de CARDDB (c)2026 AMOUROUX Jan")
+    app.title("CardDB-GUI v1.5 (c)2026 AMOUROUX Bernard - GUI de saisie des cartes de CARDDB (c)2026 AMOUROUX Jan")
     app.mainloop()
         

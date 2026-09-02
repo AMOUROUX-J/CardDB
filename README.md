@@ -38,6 +38,7 @@ CardDB est conçu pour offrir une gestion complète et flexible d'une base de do
 * **src/** : Code source principal
   * `main.py` : Point d'entrée de l'application
   * `CardDB_GUI.py` : Interface graphique utilisateur
+  * `cardDB_HLP.py` : Interface graphique de l'Aide complet
   * `Card.py` : Classe abstraite de base pour toutes les cartes
   * `CreatureCard.py` : Gestion des cartes de créatures
   * `SpellCard.py` : Gestion des cartes de sorts
@@ -60,6 +61,7 @@ CardDB est conçu pour offrir une gestion complète et flexible d'une base de do
   * `terrain_test0.json` : Exemple de terrain
 * **imgsDataDB/** : Assets visuels
   * `cardImages/` : Images des cartes
+  * `cardDB-GUI.hlp` : Fichier contenant l'aide (texte pré-formaté)
 
 ## Technologies
 

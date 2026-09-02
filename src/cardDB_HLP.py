@@ -1,6 +1,6 @@
 # -- encode utf-8 --
 """
-carddb-hlp, bibliothèque du projet CardDB-GUI v1.2. Fournit les objets,
+carddb-hlp, bibliothèque du projet CardDB-GUI v1.5. Fournit les objets,
 classes pour l'aide intégré à l'application. 
 Copyright (C) 2026  Bernard AMOUROUX
 
@@ -31,6 +31,7 @@ __license__ = "GPL 3"
 
 import re
 import locale
+import string
 import os, sys
 
 import tkinter as tk
@@ -113,7 +114,8 @@ class Patterns():
     @property
     def whole_paragraph(self) -> str:
         return r'-([\d.]*?)__([\s\S]*?):([\s\S]*?)EOP'
-
+    
+    @property
     def items_title(self) -> str:
         return r"[\s]{4}('[\w /_-]+?'[\s]*?:)+?"
 
@@ -202,7 +204,7 @@ class Help_System(tk.Toplevel):
         self.txtFont = Font(family='Consolas', size=12, weight='normal', slant='italic')
         self.btnFont = Font(family='Sans', size=11, weight='normal', slant='italic')
         # ---------------------------------------------------------------------
-        self.title(f" Aide CardDB-GUI v1.2 ")
+        self.title(f" Aide CardDB-GUI v1.5 ")
         self.protocol("WM_DELETE_WINDOW", self.Quit)    
         #self.wm_attributes("-topmost", 1)    # - Fenetre popup toujours au premier plan
         self.grid_columnconfigure(list(range(10)), weight=1)
@@ -235,10 +237,13 @@ class Help_System(tk.Toplevel):
     def on_paragraph_select(self, event):
         selection = event.widget.curselection() 
         if selection:
+            # ------- Recherche du numéro du paragraphe par son 'Titre' -------
             data = f"{event.widget.get(selection[0])} :"
             number = list(filter(lambda p:p.title==data, self.paragraphes.all_paragraph.values()))[0].numero
-            index = self.__helpText.search(f"{number}", "1.0", tk.END)
-            self.__helpText.see(index=index)
+            # -- Recherche de l'index relatif du paragraphe par son tag texte -
+            index = int(f"{self.__helpText.tag_ranges(f'paragraph_{number}')[0]}".split('.')[0])
+            # -- Placement du paragraphe relativement au 1/4 haut de l'écran --
+            self.__helpText.yview_pickplace(index-3)
     
     def show_paragraph(self, number:float, state="normal"):
         if state != "normal": self.__helpList.configure(state=state)
@@ -246,35 +251,35 @@ class Help_System(tk.Toplevel):
         if paragraph.isTitle:
             self.__helpText.insert(tk.END, f"{int(paragraph.numero)}"+' - '+paragraph.title+'\n', (f"paragraph_{number}", "title_nbr"))
         else:
-            self.__helpText.insert(tk.END, f"{paragraph.numero}"+' - ', (f"paragraph_{number}", "number"))
+            self.__helpText.insert(tk.END, f"{paragraph.numero}"+' - ', (f"paragraph_{number}", "title"))
             self.__helpText.mark_set("end_number", f"{tk.END} -1c")
             linT,colT = self.__helpText.index("end_number").split('.')
-            self.__helpText.insert(tk.END, ' '+paragraph.title+'\n', f"paragraph_{number}")
-        # -----------------------------------------------------------------
+            self.__helpText.insert(tk.END, ' '+paragraph.title, f"paragraph_{number}")
+        # ---------------------------------------------------------------------
         if not paragraph.text.isspace():
+            # --- Insertion du texte dans le widget Tkinter.ScrolledText() ----
+            self.__helpText.mark_set("deb_txt", tk.END); deb_txt = self.__helpText.index('deb_txt')
+            self.__helpText.insert('deb_txt', f"{paragraph.text}\n", (f"paragraph_{number}", "texte"))
+            # ---- Recherche des mises en evidence de texte "'xxxxx'   :" -----
+            spans = list(map(lambda sp:(self.__getIdx__(deb_txt,sp.span()[0]), self.__getIdx__(deb_txt,sp.span()[1])), \
+                                                           re.finditer(self.__pattern.items_title,paragraph.text,flags=0)))
+            [self.__helpText.tag_add('txtle', span[0], span[1]) for span in spans]    
             # -----------------------------------------------------------------
-            self.__helpText.mark_set("deb_txt", f"{tk.END}"); deb_txt = self.__helpText.index('deb_txt')
-            self.__helpText.insert(tk.END, f"{paragraph.text}\n", f"paragraph_{number}")
-            # -----------------------------------------------------------------
-            spans = list(map(lambda sp:sp.span(),re.finditer(self.__pattern.items_title(),paragraph.text,flags=0)))
-            [self.__helpText.tag_add('txtle', self.__helpText.index(f"{deb_txt}+{span[0]}c-5c"),
-                                        self.__helpText.index(f"{deb_txt}+{span[1]}c-5c")) for span in spans]
-            self.__helpText.mark_set('end_txt', f"{tk.END}+1c"); end_txt = self.__helpText.index('end_txt')
-            # -----------------------------------------------------------------
-            self.__helpText.tag_add("title", f"{linT}.{colT}", f"{int(linT)+1}.0")
-            self.__helpText.tag_add("texte", deb_txt, end_txt)
-            self.__helpText.insert(tk.END, '\n')
+            self.__helpText.tag_add("title", f"{linT}.{colT}", f"{linT}.0+1l")
         self.wm_deiconify()
+        
+    def __getIdx__(self, end:str, span:int) -> str:
+        return self.__helpText.index(f"{end}+{span}c-5c")
     
     def show_whole_help(self):
         self.delete_text()
         self.__helpList.configure(state="normal")
         [self.show_paragraph(number) for number in self.paragraphes.all_paragraph]
-        self.title_bar.update_vltexte(f"  Aide de CardDB-GUI v1.2 ",1)
+        self.title_bar.update_vltexte(f"  Aide de CardDB-GUI v1.5 ",1)
         self.__helpText.configure(state='disabled')
             
     def show_strait_help(self):
-        self.title_bar.update_vltexte(f"  Aide de CardDB-GUI v1.2 ",1)
+        self.title_bar.update_vltexte(f"  Aide de CardDB-GUI v1.5 ",1)
         self.__helpText.insert('end', self.paragraphes.__str__()+'\n')
         self.__helpText.configure(state='disabled')
         self.wm_deiconify()
@@ -308,8 +313,8 @@ if __name__ == "__main__":
     #print(helper.paragraphes.get_paragraph("2.1"))
     #[print(item.__str__()) for key,item in helper.paragraphes.all_paragraph.items()]
     
-    helper.show_paragraph("2.3", state="disabled")
+    #helper.show_paragraph("1.5", state="disabled")
     #helper.show_strait_help()
-    #helper.show_whole_help()
+    helper.show_whole_help()
     root.mainloop()
     root.quit()

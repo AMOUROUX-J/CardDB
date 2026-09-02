@@ -1,13 +1,13 @@
-### Fichier d'aide CardDB-GUI v1.2 ### 
+### Fichier d'aide CardDB-GUI v1.5 ### 
 
 
--1__CardDB Graphic User Interface v1.2:    EOP
+-1__CardDB Graphic User Interface v1.5:    EOP
     -1.1__But de l'application:    
         Créer, modifier et/ou supprimer les cartes virtuelles du jeu 'CardDB' imaginé par messieurs Steven Lecurieux et Doriqam Vidal.
         EOP
 
     -1.2__Installation/désinstallation de l'application:    
-        L'installation se fait à partir du fichier 'CardDB_GUIv1.2_Setup.exe' pour les versions Windows 10 et supérieures. Il n'y a pas de fichier de paramétrage pour cette version.
+        L'installation se fait à partir du fichier 'CardDB_GUIv1.5_Setup.exe' pour les versions Windows 10 et supérieures. Il n'y a pas de fichier de paramétrage pour cette version.
         Si l'installation est faite en mode TOUS utilisateurs, c'est à dire administrateur, il faut donner les droits en lecture/écriture aux dossiers crées par l'application à tous les utilisateurs, sinon, vous ne pourez rien modifier/sauvegarder!.
         La désinstallation doit se faire par l'Ajout/Suppression de programmes de Windows.
         EOP
@@ -47,7 +47,7 @@
             'Equipement'  : décrit le mode de défense, le type d'arme et la/les races qui l'utiliseront. 
             'Spell'       : Trois possibilités pour les sortilèges à créer : 'passif', 'actif', 'invocation'
             'Terrain'     : décrit le type de terrain de la carte globale sur lequel se produit l'action.
-            EOP
+        EOP
 
     -2.2__Items communs à toutes les cartes:    
         'Nom de la carte'  : Le nom à donner à la carte à créer d'un minimum de 1 caractère. Si ce champ reste vide, un message d'erreur apparaitra et la carte ne sera pas crée.
@@ -59,7 +59,7 @@
     -2.3__Données statistiques de combat:    
         'Points de vie'     : Points de vie de la carte lors de sa mise en jeu.
         'Soin'              : Nombre de 'MédiPack' que possède la créature à la mise en jeu.
-        'Points d'attaque'  : Points servant à l'attaque lors de la mise en jeu.
+        'Points d attaque'  : Points servant à l'attaque lors de la mise en jeu.
         'Points de défense' : Points servant à parer les attaques des adversaires. Diminue en fonction des attaques à contrer au cours du jeu.
         'Valeur critique'   : Peut prendre cinq valeurs définies entre 0 et 20. Utilisation à définir !
         'Ciblage'           : Valeur définissant comment la carte porte ses attaques. Choisir une valeur parmi celles de la liste déroulante qui sont : 
@@ -77,15 +77,15 @@
     
     -2.5__Attributs spécifiques aux types de cartes:    
         'Carte Equipement - Mode de défense' : sélection unique, deux choix possibles : arme ou armure
-        '                   type d arme'     : choix unique parmi la liste déroulante.
+        '                   type d arme'     : choix unique parmi la liste déroulante si le mode de défense choisi est 'arme'.
         '                   Races équipées'  : choix multiples parmi ceux de la liste modifiable des races. Les trois boutons à droite servent à Ajouter, Supprimer et afficher/cacher la fenêtre popup montrant vos choix.    
-        'Carte Spell      - Type de sort'    : choisir un sortilège parmi les trois possibles de la liste déroulante.  
+        'Carte Spell      - Type de sort'    : choisir un sortilège parmi les trois possibles de la liste déroulante.
         EOP
 
-    -2.6__Boutons Ajouter/Supprimer/Afficher les items:            
+    -2.6__Boutons Ajouter/Supprimer/Afficher les items:    
         La sélection des 'Effets','Equipements' ou 'Races' peut-être multiple. Seule la sélection des 'Talents' est unique. La liste obtenue peut être affichée dans une fenêtre popup par appui sur le bouton de droite parmi les trois qui sont à coté de la liste déroulante.
         Pour ajouter un effet, le sélectionner dans la liste déroulante puis cliquer sur le bouton 'plus', le premier des trois. Pour en retirer un de la liste, le sélectionner dans la liste déroulantes puis cliquer sur le bouton 'suppr', celui du milieu.
-        Le contenu de la fenêtre popup s'actualise en temps réel. Un click molette sur la fenêtre popup ferme la fenêtre. La liste est conservée et sera enregistrée lors de la sauvegarde de la carte crée.
+        Le contenu de la fenêtre popup s'actualise en temps réel. Un click molette sur la fenêtre popup ferme la fenêtre. La liste est conservée et sera enregistrée lors de la sauvegarde de la carte crée.   
         EOP  
 
 -3__Les listes Modifiables :    EOP     
@@ -94,8 +94,8 @@
         Cette modification est valide tant que l'application est active.
         EOP
 
-    -3.2__Sauvegarde des Listes Modifiables:    
+    -3.2__Modificatioin/Sauvegarde des Listes Modifiables:    
         Les Listes Modifiables peuvent être sélectionnées indépendamment grâce aux cases à cocher nommées 'Effets', 'Eléments', 'Talents' et 'Races'. La case 'Races' se valide lorsqu'on sélectionne la création d'une carte Equipement.
-        Lors du changement d'état d'une des cases, le message de la barre d'état de droite se met à jour. Elle indique si la sauvegarde est active et quelles listes seront sauvées dans les fichiers éponymes.
+        Lors du changement d'état d'une des cases, la liste déroulante concernée passe de 'Lecture seule' à 'Modifiable' ou inversement. Le message de la barre d'état de droite se met à jour. Elle indique si la sauvegarde est active et quelles listes seront sauvées dans les fichiers éponymes.
         EOP
 
