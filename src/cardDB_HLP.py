@@ -29,15 +29,18 @@ __date__ = "$Date: 2026/08/01 07:00 $"
 __copyright__ = "Copyright (c) 2026 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
+from ntpath import isfile
 import re
 import locale
-import string
+#import stat
+#import string
 import os, sys
 
 import tkinter as tk
 import os.path as osp
 import tkinter.scrolledtext as tkText
 
+from PIL import Image,ImageTk
 from tkinter.font import Font
 from itertools import chain
 
@@ -117,7 +120,11 @@ class Patterns():
     
     @property
     def items_title(self) -> str:
-        return r"[\s]{4}('[\w /_-]+?'[\s]*?:)+?"
+        return r"[\s]{1}('[\w /_-]+?'[\s]*?:)+?"
+    
+    @property
+    def imageInText(self) -> str:
+        return r"##Image[\d]{1,2}:[\s\S]+?.png##"
 
 class Paragraphe():
     """ Classe définissant la structure d'un paragraphe du système d'aide """
@@ -138,7 +145,7 @@ class Paragraphe():
         return hash((self.numero, self.span, self.text))
     
     def __str__(self) -> str:
-        return f"Chapitre {self.numero} : {self.title}{self.text[:50]+' ...' if not self.isTitle else ' -> TITLE\t'} span: {self.span}"
+        return f"Chapitre {self.numero} : {self.title}{self.text if not self.isTitle else ' -> TITLE\t'} span: {self.span}"
 
 class Paragraphes():
     """ Classe qui lit un fichier texte pré-formaté et crée un dictionnaire dans lequel on
@@ -188,12 +195,12 @@ class Help_System(tk.Toplevel):
     def __init__(self, master:tk.Tk, *args, **kwargs):
         
         self.__pattern = Patterns()
+        self.__help_images:dict = ({})
         self.__helpText:tkText.ScrolledText
         self.paragraphes = Paragraphes(osp.join("./","imgsDataDB","CardDB-GUI.hlp"))
         # ------- Création de la liste des rubriques 'titre' de l'aide --------
-        titles_list = list(filter(lambda p:not p.isTitle, self.paragraphes.all_paragraph.values()))
-        self.__vlstTitles = tk.StringVar(value=list(map(lambda t:t.title.split(' :')[0], titles_list)))
-        #print(f"Help titles list: {self.__vlstTitles.get()}")
+        self.Titles_List = list(filter(lambda p:not p.isTitle, self.paragraphes.all_paragraph.values()))
+        self.__vlstTitles = tk.StringVar(value=list(map(lambda t:t.title.split(' :')[0], self.Titles_List)))
         # ---------------------------------------------------------------------
         tab_options:dict = {'bd':3, 'bg':'LightSteelBlue1', 'relief':'ridge', 'padx':2, 'pady':2}        
         for key in list(tab_options.keys()):
@@ -222,6 +229,7 @@ class Help_System(tk.Toplevel):
                               activestyle="dotbox",height=20,selectmode="extended",listvariable=self.__vlstTitles)
         self.__helpList.grid(column=0, row=1, columnspan=2, sticky="nsew")
         self.__helpText = tkText.ScrolledText(self,bg='ivory',bd=2,relief="sunken",font=self.txtFont,wrap="word")
+        # ------- Création des Tag_texte pour mise en évidence du texte -------
         self.__helpText.tag_configure("title_nbr", font=('Consolas 14 bold italic'), lmargin1=2, spacing1=2,
                                                    spacing3=2, relief="flat", border=0, background="orange")
         self.__helpText.tag_configure("number", font=('Consolas 14 bold italic'), lmargin1=10, spacing1=2,
@@ -229,11 +237,21 @@ class Help_System(tk.Toplevel):
         self.__helpText.tag_configure("texte", background="ivory", spacing1=5, lmargin2=5, rmargin=10)
         self.__helpText.tag_configure("title", font=self.lblFont, background="DarkOliveGreen1")
         self.__helpText.tag_configure("txtle", font=('Consolas 12 bold italic'))
+        self.__helpText.tag_configure("image", elide=True)
+        # ---------------------------------------------------------------------
         self.__helpText.grid(column=2, row=1, columnspan=8, sticky="nsew")
         self.state_bar = Help_StateBar(self,0,2,cspan=10,pady=3,txtfont=self.txtFont,sticky="nsew", bg='wheat',
             defMessage=" Info : F1 pour l'aide complet, Ctrl-F1 pour l'aide contextuel, 'Echap' ferme la fenètre.", defTime=5)
         self.bind("<<ListboxSelect>>", self.on_paragraph_select)
-    
+
+    def __preload_help_Image(self, fname:str) -> Image.Image:
+        filename = osp.join(os.getcwd(),"imgsDataDB",fname)
+        if osp.isfile(filename):
+            image = Image.open(fp=filename, mode='r', formats=('PNG',)).convert("RGBA")
+            image.thumbnail((600,600), Image.Resampling.LANCZOS)
+            return ImageTk.PhotoImage(image=image, master=self)
+        return None
+
     def on_paragraph_select(self, event):
         selection = event.widget.curselection() 
         if selection:
@@ -246,30 +264,43 @@ class Help_System(tk.Toplevel):
             self.__helpText.yview_pickplace(index-3)
     
     def show_paragraph(self, number:float, state="normal"):
-        if state != "normal": self.__helpList.configure(state=state)
         paragraph = self.paragraphes.get_paragraph(number)
         if paragraph.isTitle:
             self.__helpText.insert(tk.END, f"{int(paragraph.numero)}"+' - '+paragraph.title+'\n', (f"paragraph_{number}", "title_nbr"))
         else:
-            self.__helpText.insert(tk.END, f"{paragraph.numero}"+' - ', (f"paragraph_{number}", "title"))
-            self.__helpText.mark_set("end_number", f"{tk.END} -1c")
+            self.__helpText.insert(tk.END, f"{paragraph.numero}"+' - '+paragraph.title, f"paragraph_{number}")
+            self.__helpText.mark_set("end_number", "end-1c")
             linT,colT = self.__helpText.index("end_number").split('.')
-            self.__helpText.insert(tk.END, ' '+paragraph.title, f"paragraph_{number}")
         # ---------------------------------------------------------------------
         if not paragraph.text.isspace():
             # --- Insertion du texte dans le widget Tkinter.ScrolledText() ----
-            self.__helpText.mark_set("deb_txt", tk.END); deb_txt = self.__helpText.index('deb_txt')
+            self.__helpText.mark_set("deb_txt", "end-1c"); deb_txt = self.__helpText.index('deb_txt')
             self.__helpText.insert('deb_txt', f"{paragraph.text}\n", (f"paragraph_{number}", "texte"))
             # ---- Recherche des mises en evidence de texte "'xxxxx'   :" -----
             spans = list(map(lambda sp:(self.__getIdx__(deb_txt,sp.span()[0]), self.__getIdx__(deb_txt,sp.span()[1])), \
                                                            re.finditer(self.__pattern.items_title,paragraph.text,flags=0)))
-            [self.__helpText.tag_add('txtle', span[0], span[1]) for span in spans]    
+            [self.__helpText.tag_add('txtle', span[0], span[1]) for span in spans]
+            #print(f"spans: {spans}") 
+            # --- Recherche des descripteurs d'images "##ImageXX:fname.PNG" ---
+            imgs = list(map(lambda sp:(self.__getIdx__(deb_txt,sp.span()[0]), self.__getIdx__(deb_txt,sp.span()[1]),
+                       sp.group().split(':')[1][:-2]), re.finditer(self.__pattern.imageInText,paragraph.text,flags=re.IGNORECASE)))
+            # --- Affichage des images sur les emplacements des descripteurs --
+            for img in imgs[::-1]:
+                self.__helpText.tag_add('image', img[0], img[1])
+                if self.__help_images.get(img[2], -1) == -1:
+                    self.__help_images[img[2]] = self.__preload_help_Image(img[2])
+                self.__helpText.image_create(img[0],image=self.__help_images[img[2]],align="top",name=img[2])
+            #print(f"imgs: {imgs}")
             # -----------------------------------------------------------------
-            self.__helpText.tag_add("title", f"{linT}.{colT}", f"{linT}.0+1l")
+            self.__helpText.tag_add("title", f"{linT}.0", f"{linT}.end+1c")
+            self.__helpList.selection_set('active')
+            if state != "normal":
+                self.__helpList.configure(state=state)
+                self.readonly(state=state)
         self.wm_deiconify()
         
     def __getIdx__(self, end:str, span:int) -> str:
-        return self.__helpText.index(f"{end}+{span}c-5c")
+        return self.__helpText.index(f"{end}+{span}c")
     
     def show_whole_help(self):
         self.delete_text()
@@ -282,14 +313,15 @@ class Help_System(tk.Toplevel):
         self.title_bar.update_vltexte(f"  Aide de CardDB-GUI v1.5 ",1)
         self.__helpText.insert('end', self.paragraphes.__str__()+'\n')
         self.__helpText.configure(state='disabled')
+        self.__helpList.config(state="disabled")
         self.wm_deiconify()
     
     def delete_text(self):
         self.__helpText.configure(state='normal')
         self.__helpText.delete("1.0",'end')        
     
-    def readonly(self):
-        self.__helpText.configure(state='disabled')
+    def readonly(self, state='disabled'):
+        self.__helpText.configure(state=state)
         
     def Quit(self, event=None):
         self.delete_text()
@@ -313,8 +345,10 @@ if __name__ == "__main__":
     #print(helper.paragraphes.get_paragraph("2.1"))
     #[print(item.__str__()) for key,item in helper.paragraphes.all_paragraph.items()]
     
-    #helper.show_paragraph("1.5", state="disabled")
+    #helper.show_paragraph("3.2", state="disabled")
+    #helper.readonly(state='normal')
+    #root.after(2000,helper.show_paragraph,"1.5","disabled")
     #helper.show_strait_help()
-    helper.show_whole_help()
+    root.after(40, helper.show_whole_help())
     root.mainloop()
     root.quit()

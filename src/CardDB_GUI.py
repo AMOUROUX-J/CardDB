@@ -252,28 +252,13 @@ class List_Popup(tk.Toplevel):
         self.lst.configure(font=lst_font,selectbackground='ivory',selectforeground='black')
         self.lst.grid(column=0,row=0,sticky="nsew")
         self.lst.update()
-        
-        # ------------ récupération coordonnées fenètre principale ------------
-        self.__master.update_idletasks()
-        main_x = self.__master.winfo_rootx()
-        main_y = self.__master.winfo_rooty()
-        main_w = self.__master.winfo_width()
-        # --------------- récupération coordonnées fenètre popup --------------
-        popup_w = self.winfo_width()
-        popup_h = self.winfo_height()
-
-        offset = self.get_offset()
-        
-        x = main_x + main_w + (offset//15)
-        y = main_y + offset
+        # ----------- récupération coordonnées fenètre master/popup -----------
+        x, y = self.get_rootCoordonates(self.__get_offset())
+        popup_w, popup_h = self.winfo_width(), self.winfo_height()
         self.geometry(f"{popup_w}x{popup_h}+{x}+{y}")
         self.update(); pos = self.geometry()
         self.lst_pos = f"{pos[:pos.find('+')]}"
-        # ------- positionnement de la fenetre fonction position souris -------   
-        #pos = self.geometry()                                 # - position fenetre popup 
-        #mousexy = master.winfo_pointerxy()                    # - Récupère la position de la souris  
-        #self.lst_pos = f"{pos[:pos.find('+')]}"
-        #self.geometry(f"{self.lst_pos}+{mousexy[0]+200}+{mousexy[1]-100}")
+        # ---------------------------------------------------------------------
         self.update_idletasks()
 
     def update_list(self, liste:list|set):
@@ -281,9 +266,16 @@ class List_Popup(tk.Toplevel):
             liste.discard("None")
             liste = list(liste)
         self.__vliste.set(liste)
+    
+    def get_rootCoordonates(self, offset:int) -> tuple:
+        # ------------ récupération coordonnées fenètre principale ------------
+        self.__master.update_idletasks()
+        x, y, w = self.__master.winfo_rootx(), self.__master.winfo_rooty(), self.__master.winfo_width()
+        return x + w + (offset//5), y + offset
         
-    def get_offset(self) -> int:
-        return (len(list(filter(lambda name: "!list_popup" in name,self.__master.children.keys())))-1)*60
+    def __get_offset(self) -> int:
+        from random import choice
+        return choice(range(0, len(list(filter(lambda name: "!list_popup" in name,self.__master.children.keys())))*60, 20))
         
     def motion(self, event):
         mousexy = self.__master.winfo_pointerxy()
@@ -300,8 +292,8 @@ class PopupMenu(tk.Menu):
             'master': widget appelant doit etre un tk.Toplevel()
             'title' : titre du popup menu mis en surbrillance continue.
             Les 2 paramètres suivants indiquent les actions du menu.
-            'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str, commande:list[callable])
-            'nosel' : list[int] liste des indices des rubrique dont l'état sera 'disabled' 
+            'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str, commande:callable)
+            'nosel' : list[int] liste des indices des rubrique dont l'état sera 'disabled' à l'affichage. 
         Les méthodes de la classe sont:
             show_Menu_popup()   : affiche le menu popup à l'endroit du clic droit souris.
             nomenupopup(NoSel)  : prend en paramètre une liste contenant les numéros des rubriques à dévalider.
@@ -381,12 +373,12 @@ class Application(tk.Tk):
         # ------------- Création virtual-Event menu contextuel ----------------
         self.event_add("<<PopupMenu>>","<Control-M>","<Control-m>","<Button-3>")
         # ----------------------- EDT main poup menu --------------------------
-        commandsList = [(" Backup des Listes en quittant","On/Off ",self.__toggle_backupList),
+        commandsList = [(" Sauvegarde des Listes","On/Off ",self.__toggle_backupList),
                         ("separator","",None),
                         (" Mode plein écran on/off","F11",self.__toggle_fullscreen),
                         ("separator","",None),
-                        (" A propos de  CardDB-GUI","Alt-F1",self.fenetre_a_propos),
                         (" Aide de CardDB-GUI","F1",self.__show_wholeHelp),
+                        (" A propos de","Alt-F1",self.fenetre_a_propos),
                         ("separator","",None),
                         (" Quitter CardDB-GUI ","Alt-F4 ",self.Quit)]
         self.cardDBMenu = PopupMenu(self, "        CardDB-GUI v1.5, PopupMenu", commandsList, nosel=[])
@@ -729,8 +721,9 @@ class Application(tk.Tk):
                 paragraph = 1.6
             else:
                 paragraph = -1
+        if self.cardDBhelp.winfo_ismapped(): self.cardDBhelp.delete_text()        
         self.cardDBhelp.show_paragraph(f"{paragraph}", state="disabled") if paragraph > 0 else self.cardDBhelp.show_whole_help()
-                    
+                        
     def select_imageFile(self) -> str:
         title = "Choix du fichier Image"
         files = os.listdir(Card.ImageOutPath)

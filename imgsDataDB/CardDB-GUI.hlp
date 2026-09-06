@@ -14,6 +14,7 @@
 
     -1.3__Menu Popup de CardDB_GUI:    
         Un click-Droit sur la fenêtre de l'application ouvre un menu popup qui permet d'agir sur le comportement de l'application. Cinq rubriques sont ainsi disponnibles :
+        ##Image01:menuPopup.png##    
         'Backup des Listes Modifiables' : Sauvegarde 'Oui / Non' des listes modifiables sélectionnées par les cases à cocher pré-définies en quittant l'application. 
         'Mode plein écran on/off'       : Touche F11 pour passer/sortir du mode plein écran. La touche 'Esc' pour sortir du plein écran.
         'A propos de CardDB-GUI'        : Ouvre la fenètre 'A propos'. Raccourci 'Alt-F1'.
@@ -22,7 +23,8 @@
         EOP
         
     -1.4__Les Boutons de CardDB-GUI:    
-        L'application possède quatre boutons système qui sont :    
+        L'application possède quatre boutons système qui sont :
+        ##Image02:4buttons.png##
         'RàZ Défaut'           : pour reinitialiser les champs à leurs valeurs par défaut.
         'Charger/Modifier'     : lire un fichier de carte CardDB pour le visualiser et/ou le modifier.
         'Enregistrer la carte' : Sauvegarder la carte créée sur disque dans un dossier CardDB-GUI.
@@ -30,8 +32,9 @@
         EOP
 
     -1.5__Les Barres d'état de CardDB-GUI:    
-        Deux barre d'état pour deux infos différentes. Celle de gauche indique comment obtenir le menu contextuel, l'Aide et les messages d'erreurs de création des cartes.
-        Celle de droite affiche l'activation ou non de la sauvegarde des listes modifiables et celles qui vont l'être.
+        Deux barre d'état pour deux infos différentes.
+        Celle de gauche ##Image03:leftStateBar.png## indique comment obtenir le menu contextuel, l'Aide et affiche les messages d'informations et/ou d'erreurs de création des cartes.
+        Celle de droite ##Image04:rightStateBar.png## affiche l'activation ou non de la sauvegarde des listes modifiables et celles qui vont l'être.
         EOP
 
     -1.6__Image illustrant les cartes:    
@@ -83,19 +86,23 @@
         EOP
 
     -2.6__Boutons Ajouter/Supprimer/Afficher les items:    
-        La sélection des 'Effets','Equipements' ou 'Races' peut-être multiple. Seule la sélection des 'Talents' est unique. La liste obtenue peut être affichée dans une fenêtre popup par appui sur le bouton de droite parmi les trois qui sont à coté de la liste déroulante.
-        Pour ajouter un effet, le sélectionner dans la liste déroulante puis cliquer sur le bouton 'plus', le premier des trois. Pour en retirer un de la liste, le sélectionner dans la liste déroulantes puis cliquer sur le bouton 'suppr', celui du milieu.
+        Boutons 'Ajouter/Supprimer/Lister' : ##Image05:3buttons.png##    
+        La sélection des 'Effets','Equipements' ou 'Races' peut-être multiple. Seule la sélection des 'Talents' est unique.
+        Pour Afficher/Cacher La liste de items, appuyez sur le bouton ##Image51:listButton.png##. Pour en ajouter un, le sélectionner dans la liste déroulante puis cliquer sur le bouton ##Image52:addButton.png##. Pour en retirer un de la liste, le sélectionner dans la liste déroulante puis cliquer sur le bouton ##Image53:supprButton.png##.
         Le contenu de la fenêtre popup s'actualise en temps réel. Un click molette sur la fenêtre popup ferme la fenêtre. La liste est conservée et sera enregistrée lors de la sauvegarde de la carte crée.   
         EOP  
 
 -3__Les listes Modifiables :    EOP     
     -3.1__Les listes 'Effets','Equipements','Talents' et 'Races':    
-        Ces quatre listes sont modifiables. Il est possible d'ajouter/supprimer un item dans une de ces listes. Directement dans la zone de saisie puis 'Entrée' pour ajouter un item ou bien sélectionner l'item souhaité puis 'suppr' pour le supprimer.
-        Cette modification est valide tant que l'application est active.
+        Ces quatre listes sont modifiables. Il est possible d'ajouter/supprimer un item dans chacune de ces listes. Directement dans la zone de saisie puis 'Entrée' pour ajouter ou bien sélectionner l'item souhaité puis 'suppr' pour le supprimer.
+        Cette modification est valide tant que l'application est active si l'option de sauvegarde est sur Off.
         EOP
 
     -3.2__Modificatioin/Sauvegarde des Listes Modifiables:    
         Les Listes Modifiables peuvent être sélectionnées indépendamment grâce aux cases à cocher nommées 'Effets', 'Eléments', 'Talents' et 'Races'. La case 'Races' se valide lorsqu'on sélectionne la création d'une carte Equipement.
+        ##Image06:listCheckBox.png##    
         Lors du changement d'état d'une des cases, la liste déroulante concernée passe de 'Lecture seule' à 'Modifiable' ou inversement. Le message de la barre d'état de droite se met à jour. Elle indique si la sauvegarde est active et quelles listes seront sauvées dans les fichiers éponymes.
+        La bascule On/Off des sauvegardes de listes s'effectue par validation de l'option idoine du Menu contextuel (Ctrl-M ou Clic-Droit). L'état s'affiche dans la barre d'état en bas à droite de l'écran de l'application.
+        ##Image61:rightStateBarOK.png##
         EOP
 
